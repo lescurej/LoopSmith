@@ -11,7 +11,7 @@ struct SeamlessProcessor {
                         progress: ((Double) -> Void)? = nil,
                         completion: @escaping (Result<Double, Error>) -> Void) {
 
-        DispatchQueue.global(qos: .userInitiated).async {
+        let workItem = DispatchWorkItem {
             do {
                 DispatchQueue.main.async {
                     progress?(0.0)
@@ -40,7 +40,8 @@ struct SeamlessProcessor {
                 var offsetFrames = 0
                 if rhythmSync {
                     let searchRange = min(fadeSamples, max(0, total - fadeSamples * 2))
-                    if searchRange > 0, let channel = inputChannels.first {
+                    if searchRange > 0, numChannels > 0 {
+                        let channel = inputChannels[0]
                         var bestScore: Float = .greatestFiniteMagnitude
                         for off in (-searchRange)...searchRange {
                             let endStart = total - fadeSamples + off
@@ -162,5 +163,6 @@ struct SeamlessProcessor {
                 completion(.failure(error))
             }
         }
+        DispatchQueue.global(qos: .userInitiated).async(execute: workItem)
     }
 }
