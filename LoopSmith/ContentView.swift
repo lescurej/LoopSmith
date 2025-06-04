@@ -51,8 +51,16 @@ struct ContentView: View {
                     PreviewButton(file: file)
                 }
                 TableColumn("Progress") { file in
-                    ProgressBar(progress: file.progress)
-                        .frame(width: 100, height: 10)
+                    if let url = file.exportedURL, file.progress >= 1.0 {
+                        Link("done!", destination: url.deletingLastPathComponent())
+                    } else {
+                        ProgressBar(progress: file.progress)
+                            .frame(width: 100, height: 10)
+                    }
+                }
+                TableColumn("Exported Path") { file in
+                    Text(file.exportedURL?.path ?? "-")
+                        .lineLimit(1)
                 }
             }
             .frame(minHeight: 200)
@@ -60,6 +68,8 @@ struct ContentView: View {
                 handleDrop(providers: providers)
             }
             HStack {
+                Button("Clear exported", action: clearExported)
+                    .disabled(!audioFiles.contains { $0.exportedURL != nil })
                 Spacer()
                 Button("Export files", action: exportFiles)
                     .disabled(audioFiles.isEmpty || isExporting)
@@ -156,6 +166,7 @@ struct ContentView: View {
                     }
                     DispatchQueue.main.async {
                         updateFileProgress(fileID: file.id, progress: 1.0)
+                        markFileExported(fileID: file.id, url: outputURL)
                         group.leave()
                     }
                 }
@@ -173,6 +184,16 @@ struct ContentView: View {
         }
         let total = audioFiles.reduce(0.0) { $0 + $1.progress }
         exportProgress = total / Double(audioFiles.count)
+    }
+
+    private func markFileExported(fileID: UUID, url: URL) {
+        if let idx = audioFiles.firstIndex(where: { $0.id == fileID }) {
+            audioFiles[idx].exportedURL = url
+        }
+    }
+
+    private func clearExported() {
+        audioFiles.removeAll { $0.exportedURL != nil }
     }
 }
 

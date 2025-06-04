@@ -10,6 +10,7 @@ struct AudioFileItem: Identifiable {
     var duration: TimeInterval
     var fadeDurationMs: Double
     var progress: Double = 0.0
+    var exportedURL: URL? = nil
     var waveform: [Float] = []
     let format: AudioFileFormat
     
