@@ -24,7 +24,7 @@ struct AudioFileItem: Identifiable {
         self.fileName = url.lastPathComponent
         self.fadeDurationMs = fadeDurationMs
         guard let format = AudioFileFormat(url: url) else {
-            fatalError("Format audio non supporté")
+            fatalError("Unsupported audio format")
         }
         self.format = format
         self.duration = duration

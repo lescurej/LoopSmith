@@ -16,7 +16,7 @@ struct ContentView: View {
                     isImporting = true
                 }
                 .padding(.trailing)
-                Text("Glissez-déposez des fichiers audio dans la liste")
+                Text("Drag and drop audio files into the list")
                     .font(.caption)
             }
             .padding(.vertical)
