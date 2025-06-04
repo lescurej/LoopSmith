@@ -1,9 +1,10 @@
 import SwiftUI
+import UniformTypeIdentifiers
+import AppKit
 
 struct ContentView: View {
     @State private var audioFiles: [AudioFileItem] = []
     @State private var isImporting: Bool = false
-    @State private var outputDirectory: URL? = nil
     @State private var fadeDurationMs: Double = 30_000.0
     @State private var isExporting: Bool = false
     @State private var exportProgress: Double = 0.0
@@ -16,13 +17,8 @@ struct ContentView: View {
                     isImporting = true
                 }
                 .padding(.trailing)
-                Button("Choose output folder…") {
-                    selectOutputDirectory()
-                }
-                if let outputDirectory = outputDirectory {
-                    Text("Output folder: \(outputDirectory.path)")
-                        .font(.caption)
-                }
+                Text("Glissez-déposez des fichiers audio dans la liste")
+                    .font(.caption)
             }
             .padding(.vertical)
             HStack {
@@ -30,7 +26,7 @@ struct ContentView: View {
                 Slider(value: Binding(
                     get: { fadeDurationMs / 1000 },
                     set: { fadeDurationMs = $0 * 1000 }
-                ), in: 1...60, step: 1)
+                ), in: 1...60)
                 Text("\(Int(fadeDurationMs / 1000)) s")
             }
             .padding(.bottom)
@@ -41,6 +37,10 @@ struct ContentView: View {
                 TableColumn("Duration") { file in
                     Text(file.durationString)
                 }
+                TableColumn("Waveform") { file in
+                    WaveformView(samples: file.waveform)
+                        .frame(height: 30)
+                }
                 TableColumn("Fade (s)") { file in
                     HStack {
                         Slider(value: Binding(
@@ -50,9 +50,13 @@ struct ContentView: View {
                                     audioFiles[idx].fadeDurationMs = newValue * 1000
                                 }
                             }
-                        ), in: 1...60, step: 1)
+                        ), in: 1...60)
                         Text("\(Int(file.fadeDurationMs / 1000)) s")
                     }
+                }
+                TableColumn("Fade %") { file in
+                    let percent = file.duration > 0 ? (file.fadeDurationMs / (file.duration * 1000)) * 100 : 0
+                    Text(String(format: "%.0f%%", percent))
                 }
                 TableColumn("Progress") { file in
                     ProgressView(value: file.progress, total: 1.0)
@@ -60,10 +64,13 @@ struct ContentView: View {
                 }
             }
             .frame(minHeight: 200)
+            .onDrop(of: [UTType.fileURL.identifier]) { providers in
+                handleDrop(providers: providers)
+            }
             HStack {
                 Spacer()
                 Button("Export files", action: exportFiles)
-                    .disabled(audioFiles.isEmpty || outputDirectory == nil || isExporting)
+                    .disabled(audioFiles.isEmpty || isExporting)
             }
             if isExporting {
                 ProgressView(value: exportProgress, total: 1.0)
@@ -92,24 +99,44 @@ struct ContentView: View {
             print("Import error:", error)
         }
     }
+
+    private func handleDrop(providers: [NSItemProvider]) -> Bool {
+        for provider in providers {
+            if provider.hasItemConformingToTypeIdentifier(UTType.fileURL.identifier) {
+                provider.loadItem(forTypeIdentifier: UTType.fileURL.identifier, options: nil) { (data, _) in
+                    if let urlData = data as? Data,
+                       let url = NSURL(absoluteURLWithDataRepresentation: urlData, relativeTo: nil) as URL? ,
+                       AudioFileFormat(url: url) != nil {
+                        AudioFileItem.load(url: url, fadeDurationMs: fadeDurationMs) { item in
+                            if let item = item {
+                                DispatchQueue.main.async {
+                                    audioFiles.append(item)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return true
+    }
     
-    private func selectOutputDirectory() {
+    private func exportFiles() {
         let panel = NSOpenPanel()
         panel.canChooseDirectories = true
         panel.canCreateDirectories = true
         panel.canChooseFiles = false
         panel.allowsMultipleSelection = false
         panel.begin { response in
-            if response == .OK {
-                outputDirectory = panel.url
+            if response == .OK, let outputDirectory = panel.url {
+                startExport(to: outputDirectory)
             }
         }
     }
-    
-    private func exportFiles() {
+
+    private func startExport(to outputDirectory: URL) {
         isExporting = true
         exportProgress = 0.0
-        guard let outputDirectory = outputDirectory else { return }
 
         let filesToExport = audioFiles
         let group = DispatchGroup()
@@ -119,7 +146,7 @@ struct ContentView: View {
             updateFileProgress(fileID: file.id, progress: 0)
 
             let baseName = file.fileName.replacingOccurrences(of: "." + file.format.rawValue, with: "")
-            let outputFileName = baseName + "." + selectedFormat.rawValue
+            let outputFileName = "LOOP_" + baseName + "." + selectedFormat.rawValue
             let outputURL = outputDirectory.appendingPathComponent(outputFileName)
 
             DispatchQueue.global(qos: .userInitiated).async {

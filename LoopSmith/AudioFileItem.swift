@@ -1,6 +1,7 @@
 import Foundation
 import UniformTypeIdentifiers
 import AVFoundation
+import Accelerate
 
 struct AudioFileItem: Identifiable {
     let id = UUID()
@@ -9,6 +10,7 @@ struct AudioFileItem: Identifiable {
     var duration: TimeInterval
     var fadeDurationMs: Double
     var progress: Double = 0.0
+    var waveform: [Float] = []
     let format: AudioFileFormat
     
     var durationString: String {
@@ -17,7 +19,7 @@ struct AudioFileItem: Identifiable {
         return String(format: "%d:%02d", minutes, seconds)
     }
     
-    init(url: URL, fadeDurationMs: Double, duration: TimeInterval) {
+    init(url: URL, fadeDurationMs: Double, duration: TimeInterval, waveform: [Float] = []) {
         self.url = url
         self.fileName = url.lastPathComponent
         self.fadeDurationMs = fadeDurationMs
@@ -26,6 +28,7 @@ struct AudioFileItem: Identifiable {
         }
         self.format = format
         self.duration = duration
+        self.waveform = waveform
     }
     
     static func load(url: URL, fadeDurationMs: Double, completion: @escaping (AudioFileItem?) -> Void) {
@@ -35,8 +38,9 @@ struct AudioFileItem: Identifiable {
                 do {
                     let duration = try await asset.load(.duration)
                     let seconds = CMTimeGetSeconds(duration)
+                    let waveform = generateWaveform(url: url)
                     DispatchQueue.main.async {
-                        completion(AudioFileItem(url: url, fadeDurationMs: fadeDurationMs, duration: seconds))
+                        completion(AudioFileItem(url: url, fadeDurationMs: fadeDurationMs, duration: seconds, waveform: waveform))
                     }
                 } catch {
                     DispatchQueue.main.async {
@@ -50,8 +54,9 @@ struct AudioFileItem: Identifiable {
                 let status = asset.statusOfValue(forKey: "duration", error: &error)
                 if status == .loaded {
                     let duration = CMTimeGetSeconds(asset.duration)
+                    let waveform = generateWaveform(url: url)
                     DispatchQueue.main.async {
-                        completion(AudioFileItem(url: url, fadeDurationMs: fadeDurationMs, duration: duration))
+                        completion(AudioFileItem(url: url, fadeDurationMs: fadeDurationMs, duration: duration, waveform: waveform))
                     }
                 } else {
                     DispatchQueue.main.async {
@@ -60,6 +65,38 @@ struct AudioFileItem: Identifiable {
                 }
             }
         }
+    }
+
+    private static func generateWaveform(url: URL, samples: Int = 50) -> [Float] {
+        guard let file = try? AVAudioFile(forReading: url),
+              let buffer = AVAudioPCMBuffer(pcmFormat: file.processingFormat, frameCapacity: AVAudioFrameCount(file.length)) else {
+            return []
+        }
+
+        do {
+            try file.read(into: buffer)
+        } catch {
+            return []
+        }
+
+        guard let data = buffer.floatChannelData?[0] else { return [] }
+        let frameCount = Int(buffer.frameLength)
+        let stride = max(1, frameCount / samples)
+        var result: [Float] = []
+
+        for i in stride(from: 0, to: frameCount, by: stride) {
+            let start = i
+            let end = min(i + stride, frameCount)
+            var rms: Float = 0
+            vDSP_measqv(data + start, 1, &rms, vDSP_Length(end - start))
+            result.append(sqrt(rms))
+        }
+
+        let maxVal = result.max() ?? 1
+        if maxVal > 0 {
+            result = result.map { $0 / maxVal }
+        }
+        return result
     }
 }
 
