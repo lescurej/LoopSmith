@@ -58,7 +58,7 @@ struct SeamlessProcessor {
 
                     let crossfadeStart = rightLen - fadeSamples / 2
                     let start = max(0, crossfadeStart)
-                    let fadeLength = min(total - start, fadeSamples)
+                    let fadeLength = min(fadeSamples, rightLen - start)
 
                     if fadeLength > 0 {
                         for i in 0..<fadeLength {
