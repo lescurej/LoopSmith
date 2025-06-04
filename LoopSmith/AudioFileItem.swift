@@ -12,6 +12,7 @@ struct AudioFileItem: Identifiable {
     var progress: Double = 0.0
     var exportedURL: URL? = nil
     var waveform: [Float] = []
+    var rhythmSync: Bool = false
     let format: AudioFileFormat
     
     var durationString: String {
@@ -20,7 +21,7 @@ struct AudioFileItem: Identifiable {
         return String(format: "%d:%02d", minutes, seconds)
     }
     
-    init(url: URL, fadeDurationMs: Double, duration: TimeInterval, waveform: [Float] = []) {
+    init(url: URL, fadeDurationMs: Double, duration: TimeInterval, waveform: [Float] = [], rhythmSync: Bool = false) {
         self.url = url
         self.fileName = url.lastPathComponent
         self.fadeDurationMs = fadeDurationMs
@@ -30,6 +31,7 @@ struct AudioFileItem: Identifiable {
         self.format = format
         self.duration = duration
         self.waveform = waveform
+        self.rhythmSync = rhythmSync
     }
     
     static func load(url: URL, completion: @escaping (AudioFileItem?) -> Void) {

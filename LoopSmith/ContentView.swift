@@ -47,6 +47,17 @@ struct ContentView: View {
                         Text(String(format: "%.0f%%", file.duration > 0 ? (file.fadeDurationMs / (file.duration * 1000)) * 100 : 0))
                     }
                 }
+                TableColumn("Rhythm Sync") { file in
+                    Toggle("", isOn: Binding(
+                        get: { file.rhythmSync },
+                        set: { newVal in
+                            if let idx = audioFiles.firstIndex(where: { $0.id == file.id }) {
+                                audioFiles[idx].rhythmSync = newVal
+                            }
+                        }
+                    ))
+                    .labelsHidden()
+                }
                 TableColumn("Preview") { file in
                     PreviewButton(file: file)
                 }
@@ -159,6 +170,7 @@ struct ContentView: View {
                     outputURL: outputURL,
                     fadeDurationMs: file.fadeDurationMs,
                     format: selectedFormat,
+                    rhythmSync: file.rhythmSync,
                     progress: { percent in
                         updateFileProgress(fileID: file.id, progress: percent)
                     }
