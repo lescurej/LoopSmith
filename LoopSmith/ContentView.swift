@@ -64,7 +64,7 @@ struct ContentView: View {
                 }
             }
             .frame(minHeight: 200)
-            .onDrop(of: [UTType.fileURL.identifier]) { providers in
+            .onDrop(of: [UTType.fileURL.identifier], isTargeted: nil) { providers in
                 handleDrop(providers: providers)
             }
             HStack {

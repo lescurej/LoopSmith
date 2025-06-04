@@ -81,12 +81,12 @@ struct AudioFileItem: Identifiable {
 
         guard let data = buffer.floatChannelData?[0] else { return [] }
         let frameCount = Int(buffer.frameLength)
-        let stride = max(1, frameCount / samples)
+        let step = max(1, frameCount / samples)
         var result: [Float] = []
 
-        for i in stride(from: 0, to: frameCount, by: stride) {
+        for i in stride(from: 0, to: frameCount, by: step) {
             let start = i
-            let end = min(i + stride, frameCount)
+            let end = min(i + step, frameCount)
             var rms: Float = 0
             vDSP_measqv(data + start, 1, &rms, vDSP_Length(end - start))
             result.append(sqrt(rms))
