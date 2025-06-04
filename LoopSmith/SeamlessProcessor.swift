@@ -7,8 +7,9 @@ struct SeamlessProcessor {
                         outputURL: URL,
                         fadeDurationMs: Double,
                         format: AudioFileFormat,
+                        rhythmSync: Bool,
                         progress: ((Double) -> Void)? = nil,
-                        completion: @escaping (Result<Void, Error>) -> Void) {
+                        completion: @escaping (Result<Double, Error>) -> Void) {
 
         DispatchQueue.global(qos: .userInitiated).async {
             do {
@@ -36,6 +37,24 @@ struct SeamlessProcessor {
                 let midFrame = total / 2
                 let fadeSamples = max(1, Int(sampleRate * fadeDurationMs / 1000.0))
 
+                var offsetFrames = 0
+                if rhythmSync {
+                    let searchRange = min(fadeSamples, max(0, total - fadeSamples * 2))
+                    if searchRange > 0, let channel = inputChannels.first {
+                        var bestScore: Float = .greatestFiniteMagnitude
+                        for off in (-searchRange)...searchRange {
+                            let endStart = total - fadeSamples + off
+                            if endStart < 0 || endStart + fadeSamples > total { continue }
+                            var diff: Float = 0
+                            vDSP_distancesq(channel + endStart, 1, channel, 1, &diff, vDSP_Length(fadeSamples))
+                            if diff < bestScore {
+                                bestScore = diff
+                                offsetFrames = off
+                            }
+                        }
+                    }
+                }
+
                 // 2. Création du buffer de sortie
                 guard let outputBuffer = AVAudioPCMBuffer(pcmFormat: formatDesc, frameCapacity: totalFrames) else {
                     throw NSError(domain: "SeamlessProcessor", code: 3, userInfo: [NSLocalizedDescriptionKey: "Impossible d'allouer le buffer de sortie"])
@@ -61,11 +80,12 @@ struct SeamlessProcessor {
 
                     // Fondu entre la fin et le début du fichier (gain constant)
                     if fade > 1 {
+                        let endStart = total - fade + offsetFrames
                         for i in 0..<fade {
                             let t = Float(i) / Float(fade - 1)
                             let fadeOut = 1.0 - t
                             let fadeIn = t
-                            let endIdx = total - fade + i
+                            let endIdx = endStart + i
                             let endSample = input[endIdx]
                             let startSample = input[i]
                             output[endIdx] = endSample * fadeOut + startSample * fadeIn
@@ -135,7 +155,9 @@ struct SeamlessProcessor {
                     try outputFile.write(from: interleavedBuffer)
                 }
 
-                completion(.success(()))
+                let centerFrame = Double(midFrame - fadeSamples / 2 + offsetFrames)
+                let centerTime = centerFrame / sampleRate
+                completion(.success(centerTime))
             } catch {
                 completion(.failure(error))
             }

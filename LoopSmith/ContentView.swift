@@ -47,12 +47,25 @@ struct ContentView: View {
                         Text(String(format: "%.0f%%", file.duration > 0 ? (file.fadeDurationMs / (file.duration * 1000)) * 100 : 0))
                     }
                 }
+                TableColumn("Rhythm Sync") { file in
+                    Toggle("", isOn: Binding(
+                        get: { file.rhythmSync },
+                        set: { newVal in
+                            if let idx = audioFiles.firstIndex(where: { $0.id == file.id }) {
+                                audioFiles[idx].rhythmSync = newVal
+                            }
+                        }
+                    ))
+                    .labelsHidden()
+                }
                 TableColumn("Preview") { file in
                     PreviewButton(file: file)
                 }
                 TableColumn("Progress") { file in
                     if let url = file.exportedURL, file.progress >= 1.0 {
-                        Link("done!", destination: url.deletingLastPathComponent())
+                        Button("Open Folder") {
+                            NSWorkspace.shared.open(url.deletingLastPathComponent())
+                        }
                     } else {
                         ProgressBar(progress: file.progress)
                             .frame(width: 100, height: 10)
@@ -157,6 +170,7 @@ struct ContentView: View {
                     outputURL: outputURL,
                     fadeDurationMs: file.fadeDurationMs,
                     format: selectedFormat,
+                    rhythmSync: file.rhythmSync,
                     progress: { percent in
                         updateFileProgress(fileID: file.id, progress: percent)
                     }
