@@ -75,6 +75,12 @@ struct ContentView: View {
                     Text(file.exportedURL?.path ?? "-")
                         .lineLimit(1)
                 }
+                TableColumn("") { file in
+                    Button(action: { audioFiles.removeAll { $0.id == file.id } }) {
+                        Image(systemName: "trash")
+                    }
+                    .buttonStyle(.borderless)
+                }
             }
             .frame(minHeight: 200)
             .onDrop(of: [UTType.fileURL.identifier], isTargeted: nil) { providers in
