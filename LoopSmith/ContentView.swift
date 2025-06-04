@@ -32,22 +32,23 @@ struct ContentView: View {
                     WaveformView(samples: file.waveform)
                         .frame(height: 30)
                 }
-                TableColumn("Fade (s)") { file in
+                TableColumn("Fade (%)") { file in
                     HStack {
                         Slider(value: Binding(
-                            get: { file.fadeDurationMs / 1000 },
-                            set: { newValue in
+                            get: {
+                                file.duration > 0 ? (file.fadeDurationMs / (file.duration * 1000)) * 100 : 0
+                            },
+                            set: { newPercent in
                                 if let idx = audioFiles.firstIndex(where: { $0.id == file.id }) {
-                                    audioFiles[idx].fadeDurationMs = newValue * 1000
+                                    audioFiles[idx].fadeDurationMs = (newPercent / 100) * audioFiles[idx].duration * 1000
                                 }
                             }
-                        ), in: 1...60)
-                        Text("\(Int(file.fadeDurationMs / 1000)) s")
+                        ), in: 0...100)
+                        Text(String(format: "%.0f%%", file.duration > 0 ? (file.fadeDurationMs / (file.duration * 1000)) * 100 : 0))
                     }
                 }
-                TableColumn("Fade %") { file in
-                    let percent = file.duration > 0 ? (file.fadeDurationMs / (file.duration * 1000)) * 100 : 0
-                    Text(String(format: "%.0f%%", percent))
+                TableColumn("Preview") { file in
+                    PreviewButton(file: file)
                 }
                 TableColumn("Progress") { file in
                     ProgressBar(progress: file.progress)
