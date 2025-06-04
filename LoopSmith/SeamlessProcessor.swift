@@ -53,7 +53,7 @@ struct SeamlessProcessor {
                     let output = outputChannels[ch]
 
                     // Copie initiale du fichier complet
-                    cblas_scopy(Int32(total), input, 1, output, 1)
+                    output.assign(from: input, count: total)
 
                     // Calcul de la longueur de fondu
                     let fade = min(fadeSamples, total / 2)
@@ -77,9 +77,9 @@ struct SeamlessProcessor {
                     temp.initialize(repeating: 0, count: total)
                     defer { temp.deallocate() }
 
-                    cblas_scopy(Int32(rightLen), output + midFrame, 1, temp, 1)
-                    cblas_scopy(Int32(midFrame), output, 1, temp + rightLen, 1)
-                    cblas_scopy(Int32(total), temp, 1, output, 1)
+                    temp.assign(from: output + midFrame, count: rightLen)
+                    temp.advanced(by: rightLen).assign(from: output, count: midFrame)
+                    output.assign(from: temp, count: total)
 
                     // Appel du callback de progression
                     let percent = Double(ch + 1) / Double(numChannels)
