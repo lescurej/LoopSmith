@@ -161,6 +161,6 @@ struct SeamlessProcessor {
             } catch {
                 completion(.failure(error))
             }
-        })
+        }
     }
 }
