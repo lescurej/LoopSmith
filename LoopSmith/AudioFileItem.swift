@@ -31,13 +31,14 @@ struct AudioFileItem: Identifiable {
         self.waveform = waveform
     }
     
-    static func load(url: URL, fadeDurationMs: Double, completion: @escaping (AudioFileItem?) -> Void) {
+    static func load(url: URL, completion: @escaping (AudioFileItem?) -> Void) {
         let asset = AVURLAsset(url: url)
         if #available(macOS 13.0, *) {
             Task {
                 do {
                     let duration = try await asset.load(.duration)
                     let seconds = CMTimeGetSeconds(duration)
+                    let fadeDurationMs = seconds * 1000 * 0.15
                     let waveform = generateWaveform(url: url)
                     DispatchQueue.main.async {
                         completion(AudioFileItem(url: url, fadeDurationMs: fadeDurationMs, duration: seconds, waveform: waveform))
@@ -54,6 +55,7 @@ struct AudioFileItem: Identifiable {
                 let status = asset.statusOfValue(forKey: "duration", error: &error)
                 if status == .loaded {
                     let duration = CMTimeGetSeconds(asset.duration)
+                    let fadeDurationMs = duration * 1000 * 0.15
                     let waveform = generateWaveform(url: url)
                     DispatchQueue.main.async {
                         completion(AudioFileItem(url: url, fadeDurationMs: fadeDurationMs, duration: duration, waveform: waveform))

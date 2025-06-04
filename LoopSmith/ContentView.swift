@@ -5,7 +5,6 @@ import AppKit
 struct ContentView: View {
     @State private var audioFiles: [AudioFileItem] = []
     @State private var isImporting: Bool = false
-    @State private var fadeDurationMs: Double = 30_000.0
     @State private var isExporting: Bool = false
     @State private var exportProgress: Double = 0.0
     @State private var selectedFormat: AudioFileFormat = .wav
@@ -21,15 +20,7 @@ struct ContentView: View {
                     .font(.caption)
             }
             .padding(.vertical)
-            HStack {
-                Text("Global fade (s):")
-                Slider(value: Binding(
-                    get: { fadeDurationMs / 1000 },
-                    set: { fadeDurationMs = $0 * 1000 }
-                ), in: 1...60)
-                Text("\(Int(fadeDurationMs / 1000)) s")
-            }
-            .padding(.bottom)
+            
             Table(audioFiles) {
                 TableColumn("Name") { file in
                     Text(file.fileName)
@@ -59,8 +50,8 @@ struct ContentView: View {
                     Text(String(format: "%.0f%%", percent))
                 }
                 TableColumn("Progress") { file in
-                    ProgressView(value: file.progress, total: 1.0)
-                        .frame(width: 100)
+                    ProgressBar(progress: file.progress)
+                        .frame(width: 100, height: 10)
                 }
             }
             .frame(minHeight: 200)
@@ -87,7 +78,7 @@ struct ContentView: View {
         switch result {
         case .success(let urls):
             for url in urls {
-                AudioFileItem.load(url: url, fadeDurationMs: fadeDurationMs) { item in
+                AudioFileItem.load(url: url) { item in
                     if let item = item {
                         DispatchQueue.main.async {
                             audioFiles.append(item)
@@ -107,7 +98,7 @@ struct ContentView: View {
                     if let urlData = data as? Data,
                        let url = NSURL(absoluteURLWithDataRepresentation: urlData, relativeTo: nil) as URL? ,
                        AudioFileFormat(url: url) != nil {
-                        AudioFileItem.load(url: url, fadeDurationMs: fadeDurationMs) { item in
+                        AudioFileItem.load(url: url) { item in
                             if let item = item {
                                 DispatchQueue.main.async {
                                     audioFiles.append(item)
