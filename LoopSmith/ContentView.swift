@@ -26,14 +26,6 @@ struct ContentView: View {
             }
             .padding(.vertical)
             HStack {
-                Text("Output format:")
-                Picker("Format", selection: $selectedFormat) {
-                    ForEach(AudioFileFormat.allCases, id: \.self) { format in
-                        Text(format.rawValue.uppercased()).tag(format)
-                    }
-                }
-                .pickerStyle(SegmentedPickerStyle())
-                Spacer()
                 Text("Global fade (s):")
                 Slider(value: Binding(
                     get: { fadeDurationMs / 1000 },

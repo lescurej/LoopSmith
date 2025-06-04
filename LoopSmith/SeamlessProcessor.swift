@@ -125,8 +125,6 @@ struct SeamlessProcessor {
                                                      commonFormat: .pcmFormatFloat32,
                                                      interleaved: true)
                     try outputFile.write(from: interleavedBuffer)
-                case .mp3:
-                    throw NSError(domain: "SeamlessProcessor", code: 6, userInfo: [NSLocalizedDescriptionKey: "Le format MP3 n'est pas pris en charge en écriture"])
                 }
 
                 completion(.success(()))

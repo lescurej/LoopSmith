@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:LoopSmith}",
+            "name": "Debug LoopSmith",
+            "program": "${workspaceFolder:LoopSmith}/.build/debug/LoopSmith",
+            "preLaunchTask": "swift: Build Debug LoopSmith"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:LoopSmith}",
+            "name": "Release LoopSmith",
+            "program": "${workspaceFolder:LoopSmith}/.build/release/LoopSmith",
+            "preLaunchTask": "swift: Build Release LoopSmith"
+        }
+    ]
+}

@@ -64,7 +64,7 @@ struct AudioFileItem: Identifiable {
 }
 
 enum AudioFileFormat: String, CaseIterable {
-    case wav, aiff, mp3
+    case wav, aiff
     
     static var allowedUTTypes: [UTType] {
         [UTType.wav, UTType.aiff, UTType.mp3]
@@ -74,7 +74,6 @@ enum AudioFileFormat: String, CaseIterable {
         switch url.pathExtension.lowercased() {
         case "wav": self = .wav
         case "aiff", "aif": self = .aiff
-        case "mp3": self = .mp3
         default: return nil
         }
     }
