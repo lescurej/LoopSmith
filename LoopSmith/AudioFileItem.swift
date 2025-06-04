@@ -14,6 +14,14 @@ struct AudioFileItem: Identifiable {
     var waveform: [Float] = []
     var rhythmSync: Bool = false
     let format: AudioFileFormat
+
+    /// Returns the output URL for this file when exported to the given directory
+    /// in the specified format. The name is generated once here to centralise the logic.
+    func outputURL(in directory: URL, format: AudioFileFormat) -> URL {
+        let baseName = fileName.replacingOccurrences(of: "." + self.format.rawValue, with: "")
+        let outputFileName = "LOOP_" + baseName + "." + format.rawValue
+        return directory.appendingPathComponent(outputFileName)
+    }
     
     var durationString: String {
         let minutes = Int(duration) / 60

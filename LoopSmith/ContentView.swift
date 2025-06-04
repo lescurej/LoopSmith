@@ -7,6 +7,7 @@ struct ContentView: View {
     @State private var isImporting: Bool = false
     @State private var isExporting: Bool = false
     @State private var exportProgress: Double = 0.0
+    @State private var exportCompleted: Bool = false
     @State private var selectedFormat: AudioFileFormat = .wav
 
     var body: some View {
@@ -96,6 +97,10 @@ struct ContentView: View {
             if isExporting {
                 ProgressView(value: exportProgress, total: 1.0)
                     .padding(.vertical)
+            } else if exportCompleted {
+                Text("Export terminé")
+                    .foregroundColor(.green)
+                    .padding(.vertical)
             }
         }
         .padding()
@@ -158,6 +163,7 @@ struct ContentView: View {
     private func startExport(to outputDirectory: URL) {
         isExporting = true
         exportProgress = 0.0
+        exportCompleted = false
 
         let filesToExport = audioFiles
         let group = DispatchGroup()
@@ -166,9 +172,7 @@ struct ContentView: View {
             group.enter()
             updateFileProgress(fileID: file.id, progress: 0)
 
-            let baseName = file.fileName.replacingOccurrences(of: "." + file.format.rawValue, with: "")
-            let outputFileName = "LOOP_" + baseName + "." + selectedFormat.rawValue
-            let outputURL = outputDirectory.appendingPathComponent(outputFileName)
+            let outputURL = file.outputURL(in: outputDirectory, format: selectedFormat)
 
             DispatchQueue.global(qos: .userInitiated).async {
                 SeamlessProcessor.process(
@@ -195,6 +199,10 @@ struct ContentView: View {
 
         group.notify(queue: .main) {
             isExporting = false
+            exportCompleted = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                exportCompleted = false
+            }
         }
     }
 
