@@ -2,21 +2,21 @@
 import PackageDescription
 
 let package = Package(
-    name: "SeamlessLooper",
+    name: "LoopSmith",
     platforms: [
         .macOS(.v12)
     ],
     products: [
-        .executable(name: "SeamlessLooper", targets: ["SeamlessLooper"])
+        .executable(name: "LoopSmith", targets: ["LoopSmith"])
     ],
     dependencies: [
         // Ajoute ici AudioKit si besoin plus tard
     ],
     targets: [
         .executableTarget(
-            name: "SeamlessLooper",
+            name: "LoopSmith",
             dependencies: [],
-            path: "SeamlessLooper"
+            path: "LoopSmith"
         )
     ]
-) 
+)
