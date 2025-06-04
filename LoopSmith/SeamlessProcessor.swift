@@ -52,29 +52,31 @@ struct SeamlessProcessor {
                     let input = inputChannels[ch]
                     let output = outputChannels[ch]
 
+                    // Copie initiale du fichier complet
+                    cblas_scopy(Int32(total), input, 1, output, 1)
+
+                    // Calcul de la longueur de fondu
+                    let fade = min(fadeSamples, total / 2)
                     let rightLen = total - midFrame
-                    cblas_scopy(Int32(rightLen), input + midFrame, 1, output, 1)
-                    cblas_scopy(Int32(midFrame), input, 1, output + rightLen, 1)
 
-                    let crossfadeStart = rightLen - fadeSamples / 2
-                    let start = max(0, crossfadeStart)
-                    let fadeLength = min(total - start, fadeSamples)
-
-                    if fadeLength > 0 {
-                        for i in 0..<fadeLength {
-                            let t = Float(i) / Float(fadeLength - 1)
-                            let fadeOut = cos(t * .pi / 2)
-                            let fadeIn = sin(t * .pi / 2)
-
-                            let secondIndex = midFrame + start + i
-                            let firstIndex = i
-
-                            let secondSample = input[secondIndex]
-                            let firstSample = input[firstIndex]
-
-                            output[start + i] = secondSample * fadeOut + firstSample * fadeIn
+                    // Fondu entre la fin et le début du fichier (gain constant)
+                    if fade > 1 {
+                        for i in 0..<fade {
+                            let t = Float(i) / Float(fade - 1)
+                            let fadeOut = 1.0 - t
+                            let fadeIn = t
+                            let endIdx = total - fade + i
+                            let endSample = input[endIdx]
+                            let startSample = input[i]
+                            output[endIdx] = endSample * fadeOut + startSample * fadeIn
                         }
                     }
+
+                    // Décalage du fichier pour que la zone de fondu soit au centre
+                    var temp = [Float](repeating: 0, count: total)
+                    cblas_scopy(Int32(rightLen), output + midFrame, 1, &temp, 1)
+                    cblas_scopy(Int32(midFrame), output, 1, temp + rightLen, 1)
+                    cblas_scopy(Int32(total), temp, 1, output, 1)
 
                     // Appel du callback de progression
                     let percent = Double(ch + 1) / Double(numChannels)
