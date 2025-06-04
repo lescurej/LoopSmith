@@ -60,18 +60,21 @@ struct SeamlessProcessor {
                     let start = max(0, crossfadeStart)
                     let fadeLength = min(total - start, fadeSamples)
 
-                    var fadeIn = [Float](repeating: 0, count: fadeLength)
-                    var fadeOut = [Float](repeating: 0, count: fadeLength)
+                    if fadeLength > 0 {
+                        for i in 0..<fadeLength {
+                            let t = Float(i) / Float(fadeLength - 1)
+                            let fadeOut = cos(t * .pi / 2)
+                            let fadeIn = sin(t * .pi / 2)
 
-                    vDSP_vgen([0.0], [1.0], &fadeIn, 1, vDSP_Length(fadeLength))
-                    vDSP_vgen([1.0], [0.0], &fadeOut, 1, vDSP_Length(fadeLength))
+                            let secondIndex = midFrame + start + i
+                            let firstIndex = i
 
-                    var fadeLeft = [Float](repeating: 0, count: fadeLength)
-                    var fadeRight = [Float](repeating: 0, count: fadeLength)
+                            let secondSample = input[secondIndex]
+                            let firstSample = input[firstIndex]
 
-                    vDSP_vmul(input, 1, fadeIn, 1, &fadeLeft, 1, vDSP_Length(fadeLength))
-                    vDSP_vmul(output + start, 1, fadeOut, 1, &fadeRight, 1, vDSP_Length(fadeLength))
-                    vDSP_vadd(fadeLeft, 1, fadeRight, 1, output + start, 1, vDSP_Length(fadeLength))
+                            output[start + i] = secondSample * fadeOut + firstSample * fadeIn
+                        }
+                    }
 
                     // Appel du callback de progression
                     let percent = Double(ch + 1) / Double(numChannels)
