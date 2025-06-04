@@ -8,7 +8,7 @@ struct ContentView: View {
     @State private var isExporting: Bool = false
     @State private var exportProgress: Double = 0.0
     @State private var selectedFormat: AudioFileFormat = .wav
-    
+
     var body: some View {
         VStack(alignment: .leading) {
             HStack {
@@ -62,6 +62,10 @@ struct ContentView: View {
                         Text("\(Int(file.fadeDurationMs / 1000)) s")
                     }
                 }
+                TableColumn("Progress") { file in
+                    ProgressView(value: file.progress, total: 1.0)
+                        .frame(width: 100)
+                }
             }
             .frame(minHeight: 200)
             HStack {
@@ -113,38 +117,51 @@ struct ContentView: View {
     private func exportFiles() {
         isExporting = true
         exportProgress = 0.0
-        let filesToExport = audioFiles
-        let total = filesToExport.count
         guard let outputDirectory = outputDirectory else { return }
-        DispatchQueue.global(qos: .userInitiated).async {
-            var completed = 0
-            for file in filesToExport {
-                let baseName = file.fileName.replacingOccurrences(of: "." + file.format.rawValue, with: "")
-                let outputFileName = baseName + "." + selectedFormat.rawValue
-                let outputURL = outputDirectory.appendingPathComponent(outputFileName)
-                print("Exporting to:", outputURL.path)
-                let semaphore = DispatchSemaphore(value: 0)
+
+        let filesToExport = audioFiles
+        let group = DispatchGroup()
+
+        for file in filesToExport {
+            group.enter()
+            updateFileProgress(fileID: file.id, progress: 0)
+
+            let baseName = file.fileName.replacingOccurrences(of: "." + file.format.rawValue, with: "")
+            let outputFileName = baseName + "." + selectedFormat.rawValue
+            let outputURL = outputDirectory.appendingPathComponent(outputFileName)
+
+            DispatchQueue.global(qos: .userInitiated).async {
                 SeamlessProcessor.process(
                     inputURL: file.url,
                     outputURL: outputURL,
                     fadeDurationMs: file.fadeDurationMs,
-                    format: selectedFormat
+                    format: selectedFormat,
+                    progress: { percent in
+                        updateFileProgress(fileID: file.id, progress: percent)
+                    }
                 ) { result in
                     if case .failure(let error) = result {
                         print("Error processing \(file.fileName):", error)
                     }
-                    semaphore.signal()
+                    DispatchQueue.main.async {
+                        updateFileProgress(fileID: file.id, progress: 1.0)
+                        group.leave()
+                    }
                 }
-                semaphore.wait()
-                completed += 1
-                DispatchQueue.main.async {
-                    exportProgress = Double(completed) / Double(total)
-                }
-            }
-            DispatchQueue.main.async {
-                isExporting = false
             }
         }
+
+        group.notify(queue: .main) {
+            isExporting = false
+        }
+    }
+
+    private func updateFileProgress(fileID: UUID, progress: Double) {
+        if let idx = audioFiles.firstIndex(where: { $0.id == fileID }) {
+            audioFiles[idx].progress = progress
+        }
+        let total = audioFiles.reduce(0.0) { $0 + $1.progress }
+        exportProgress = total / Double(audioFiles.count)
     }
 }
 

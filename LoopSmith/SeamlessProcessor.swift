@@ -12,6 +12,9 @@ struct SeamlessProcessor {
 
         DispatchQueue.global(qos: .userInitiated).async {
             do {
+                DispatchQueue.main.async {
+                    progress?(0.0)
+                }
                 // 1. Lecture du fichier audio source
                 let inputFile = try AVAudioFile(forReading: inputURL)
                 let formatDesc = inputFile.processingFormat
