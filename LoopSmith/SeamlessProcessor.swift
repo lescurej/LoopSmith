@@ -73,8 +73,11 @@ struct SeamlessProcessor {
                     }
 
                     // Décalage du fichier pour que la zone de fondu soit au centre
-                    var temp = [Float](repeating: 0, count: total)
-                    cblas_scopy(Int32(rightLen), output + midFrame, 1, &temp, 1)
+                    let temp = UnsafeMutablePointer<Float>.allocate(capacity: total)
+                    temp.initialize(repeating: 0, count: total)
+                    defer { temp.deallocate() }
+
+                    cblas_scopy(Int32(rightLen), output + midFrame, 1, temp, 1)
                     cblas_scopy(Int32(midFrame), output, 1, temp + rightLen, 1)
                     cblas_scopy(Int32(total), temp, 1, output, 1)
 
