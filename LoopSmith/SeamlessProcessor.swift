@@ -11,11 +11,11 @@ struct SeamlessProcessor {
                         progress: ((Double) -> Void)? = nil,
                         completion: @escaping (Result<Double, Error>) -> Void) {
 
-        DispatchQueue.global(qos: .userInitiated).async(execute: {
+        DispatchQueue.global(qos: .userInitiated).async {
             do {
-                DispatchQueue.main.async(execute: {
+                DispatchQueue.main.async {
                     progress?(0.0)
-                })
+                }
                 // 1. Lecture du fichier audio source
                 let inputFile = try AVAudioFile(forReading: inputURL)
                 let formatDesc = inputFile.processingFormat
@@ -103,9 +103,9 @@ struct SeamlessProcessor {
 
                     // Appel du callback de progression
                     let percent = Double(ch + 1) / Double(numChannels)
-                    DispatchQueue.main.async(execute: {
+                    DispatchQueue.main.async {
                         progress?(percent)
-                    })
+                    }
                 }
 
                 // 4. Conversion en buffer interleaved si nécessaire
