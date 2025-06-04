@@ -8,6 +8,7 @@ struct AudioFileItem: Identifiable {
     let fileName: String
     var duration: TimeInterval
     var fadeDurationMs: Double
+    var progress: Double = 0.0
     let format: AudioFileFormat
     
     var durationString: String {
