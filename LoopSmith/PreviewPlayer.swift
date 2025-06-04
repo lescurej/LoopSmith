@@ -5,13 +5,24 @@ import SwiftUI
 class PreviewPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
     @Published var isPlaying: Bool = false
     private var player: AVAudioPlayer?
+    private var timer: Timer?
 
-    func play(url: URL) {
+    func play(url: URL, startTime: TimeInterval? = nil, duration: TimeInterval? = nil) {
         do {
             player = try AVAudioPlayer(contentsOf: url)
             player?.delegate = self
+            if let start = startTime {
+                player?.currentTime = start
+            }
             player?.play()
             isPlaying = true
+
+            if let dur = duration {
+                timer?.invalidate()
+                timer = Timer.scheduledTimer(withTimeInterval: dur, repeats: false) { [weak self] _ in
+                    self?.stop()
+                }
+            }
         } catch {
             print("PreviewPlayer error:", error)
             isPlaying = false
@@ -19,14 +30,15 @@ class PreviewPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
     }
 
     func stop() {
+        timer?.invalidate()
+        timer = nil
         player?.stop()
         player = nil
         isPlaying = false
     }
 
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
-        isPlaying = false
-        self.player = nil
+        stop()
     }
 }
 
@@ -68,7 +80,9 @@ struct PreviewButton: View {
                 self.isProcessing = false
                 switch result {
                 case .success:
-                    self.player.play(url: tmpURL)
+                    let fadeSeconds = file.fadeDurationMs / 1000
+                    let startTime = max(0, (file.duration / 2) - (fadeSeconds / 2))
+                    self.player.play(url: tmpURL, startTime: startTime, duration: fadeSeconds)
                 case .failure(let error):
                     print("Preview processing error:", error)
                 }
