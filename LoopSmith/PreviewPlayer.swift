@@ -74,15 +74,16 @@ struct PreviewButton: View {
             outputURL: tmpURL,
             fadeDurationMs: file.fadeDurationMs,
             format: file.format,
+            rhythmSync: file.rhythmSync,
             progress: nil
         ) { result in
             DispatchQueue.main.async {
                 self.isProcessing = false
                 switch result {
-                case .success:
+                case .success(let centerTime):
                     let fadeSeconds = file.fadeDurationMs / 1000
-                    let startTime = max(0, (file.duration / 2) - (fadeSeconds / 2))
-                    self.player.play(url: tmpURL, startTime: startTime, duration: fadeSeconds)
+                    let start = max(0, centerTime - fadeSeconds / 2)
+                    self.player.play(url: tmpURL, startTime: start, duration: fadeSeconds)
                 case .failure(let error):
                     print("Preview processing error:", error)
                 }
