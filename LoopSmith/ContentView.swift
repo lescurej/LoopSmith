@@ -52,7 +52,9 @@ struct ContentView: View {
                 }
                 TableColumn("Progress") { file in
                     if let url = file.exportedURL, file.progress >= 1.0 {
-                        Link("done!", destination: url.deletingLastPathComponent())
+                        Button("Open Folder") {
+                            NSWorkspace.shared.open(url.deletingLastPathComponent())
+                        }
                     } else {
                         ProgressBar(progress: file.progress)
                             .frame(width: 100, height: 10)
