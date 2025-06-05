@@ -12,6 +12,21 @@ struct ContentView: View {
 
     var body: some View {
         VStack(alignment: .leading) {
+            headerView
+            importSection
+            filesTableSection
+            exportSection
+            progressSection
+        }
+        .padding()
+        .background(Color.backgroundPrimary)
+        .fileImporter(isPresented: $isImporting, allowedContentTypes: AudioFileFormat.allowedUTTypes, allowsMultipleSelection: true) { result in
+            handleImport(result: result)
+        }
+    }
+
+    private var headerView: some View {
+        VStack(alignment: .leading, spacing: 0) {
             Rectangle()
                 .fill(
                     LinearGradient(
@@ -27,154 +42,166 @@ struct ContentView: View {
                     .aspectRatio(contentMode: .fit)
                     .foregroundColor(Color("AccentColor"))
                     .frame(maxWidth: .infinity, maxHeight: 50)
-                       
-                
+
+
                 Spacer()
             }
             .padding(.bottom, -15)
+        }
+    }
 
-            HStack {
-                Button {
-                    isImporting = true
-                } label: {
-                    Label("Import", systemImage: "square.and.arrow.down")
-                        .padding(.horizontal)
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(.accentMain)
-
-                Spacer()
-
-                Text("Drag and drop audio files into the list")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+    private var importSection: some View {
+        HStack {
+            Button {
+                isImporting = true
+            } label: {
+                Label("Import", systemImage: "square.and.arrow.down")
+                    .padding(.horizontal)
             }
-            .padding(.vertical)
-            
-            Table(audioFiles) {
-                TableColumn("Name") { file in
-                    Text(file.fileName)
-                        .font(.body)
-                        .padding(.vertical, 6)
-                        .padding(.horizontal, 8)
-                        .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
-                }
-                TableColumn("Duration") { file in
-                    Text(file.durationString)
+            .buttonStyle(.borderedProminent)
+            .tint(.accentMain)
+
+            Spacer()
+
+            Text("Drag and drop audio files into the list")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .padding(.vertical)
+    }
+
+    private var filesTableSection: some View {
+        Table(audioFiles) {
+            TableColumn("Name") { file in
+                Text(file.fileName)
+                    .font(.body)
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 8)
+                    .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
+            }
+            TableColumn("Duration") { file in
+                Text(file.durationString)
+                    .monospacedDigit()
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 8)
+                    .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
+            }
+            TableColumn("Waveform") { file in
+                WaveformView(samples: file.waveform)
+                    .frame(height: 30)
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 8)
+                    .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
+            }
+            TableColumn("Fade (%)", width: .min(200, ideal: 260)) { file in
+                let percent = file.duration > 0 ? (file.fadeDurationMs / (file.duration * 1000)) * 100 : 0
+                HStack {
+                    Slider(value: Binding(
+                        get: { percent },
+                        set: { newPercent in
+                            if let idx = audioFiles.firstIndex(where: { $0.id == file.id }) {
+                                audioFiles[idx].fadeDurationMs = (newPercent / 100) * audioFiles[idx].duration * 1000
+                            }
+                        }
+                    ), in: 0...100)
+                    .tint(.accentColor)
+                    .controlSize(.small)
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, 4)
+
+                    Circle()
+                        .fill(gradientColor(for: percent))
+                        .frame(width: 8, height: 8)
+
+                    Text(String(format: "%.0f%%", percent))
                         .monospacedDigit()
+                }
+                .padding(.vertical, 6)
+                .padding(.horizontal, 8)
+                .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
+            }
+            TableColumn("Rhythm Sync") { file in
+                Toggle("", isOn: Binding(
+                    get: { file.rhythmSync },
+                    set: { newVal in
+                        if let idx = audioFiles.firstIndex(where: { $0.id == file.id }) {
+                            audioFiles[idx].rhythmSync = newVal
+                        }
+                    }
+                ))
+                .labelsHidden()
+                .padding(.vertical, 6)
+                .padding(.horizontal, 8)
+                .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
+            }
+            TableColumn("Rhythmic Recomposition") { file in
+                Toggle("", isOn: Binding(
+                    get: { file.rhythmicRecomposition },
+                    set: { newVal in
+                        if let idx = audioFiles.firstIndex(where: { $0.id == file.id }) {
+                            audioFiles[idx].rhythmicRecomposition = newVal
+                        }
+                    }
+                ))
+                .labelsHidden()
+            }
+            TableColumn("Preview") { file in
+                PreviewButton(file: file, isExporting: $isExporting)
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 8)
+                    .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
+            }
+            TableColumn("Progress") { file in
+                if let url = file.exportedURL, file.progress >= 1.0 {
+                    Button("Open Folder") {
+                        NSWorkspace.shared.open(url.deletingLastPathComponent())
+                    }
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 8)
+                    .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
+                } else {
+                    ProgressBar(progress: file.progress)
+                        .frame(width: 100)
                         .padding(.vertical, 6)
                         .padding(.horizontal, 8)
                         .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
                 }
-                TableColumn("Waveform") { file in
-                    WaveformView(samples: file.waveform)
-                        .frame(height: 30)
-                        .padding(.vertical, 6)
-                        .padding(.horizontal, 8)
-                        .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
+            }
+            TableColumn("Exported Path") { file in
+                Text(file.exportedURL?.path ?? "-")
+                    .lineLimit(1)
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 8)
+                    .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
+            }
+            TableColumn("") { file in
+                Button(action: { audioFiles.removeAll { $0.id == file.id } }) {
+                    Image(systemName: "trash")
                 }
-                TableColumn("Fade (%)", width: .min(200, ideal: 260)) { file in
-                    let percent = file.duration > 0 ? (file.fadeDurationMs / (file.duration * 1000)) * 100 : 0
-                    HStack {
-                        Slider(value: Binding(
-                            get: { percent },
-                            set: { newPercent in
-                                if let idx = audioFiles.firstIndex(where: { $0.id == file.id }) {
-                                    audioFiles[idx].fadeDurationMs = (newPercent / 100) * audioFiles[idx].duration * 1000
-                                }
-                            }
-                        ), in: 0...100)
-                        .tint(.accentColor)
-                        .controlSize(.small)
-                        .frame(maxWidth: .infinity)
-                        .padding(.horizontal, 4)
+                .buttonStyle(.borderless)
+                .padding(.vertical, 6)
+                .padding(.horizontal, 8)
+                .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
+            }
+        }
+        .frame(minHeight: 200)
+        .onDrop(of: [UTType.fileURL.identifier], isTargeted: nil) { providers in
+            handleDrop(providers: providers)
+        }
+    }
 
-                        Circle()
-                            .fill(gradientColor(for: percent))
-                            .frame(width: 8, height: 8)
+    private var exportSection: some View {
+        HStack {
+            Button("Clear exported", action: clearExported)
+                .disabled(!audioFiles.contains { $0.exportedURL != nil })
+            Spacer()
+            Button("Export files", action: exportFiles)
+                .disabled(audioFiles.isEmpty || isExporting)
+        }
+    }
 
-                        Text(String(format: "%.0f%%", percent))
-                            .monospacedDigit()
-                    }
-                    .padding(.vertical, 6)
-                    .padding(.horizontal, 8)
-                    .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
-                }
-                TableColumn("Rhythm Sync") { file in
-                    Toggle("", isOn: Binding(
-                        get: { file.rhythmSync },
-                        set: { newVal in
-                            if let idx = audioFiles.firstIndex(where: { $0.id == file.id }) {
-                                audioFiles[idx].rhythmSync = newVal
-                            }
-                        }
-                    ))
-                    .labelsHidden()
-                    .padding(.vertical, 6)
-                    .padding(.horizontal, 8)
-                    .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
-                }
-                TableColumn("Rhythmic Recomposition") { file in
-                    Toggle("", isOn: Binding(
-                        get: { file.rhythmicRecomposition },
-                        set: { newVal in
-                            if let idx = audioFiles.firstIndex(where: { $0.id == file.id }) {
-                                audioFiles[idx].rhythmicRecomposition = newVal
-                            }
-                        }
-                    ))
-                    .labelsHidden()
-                }
-                TableColumn("Preview") { file in
-                    PreviewButton(file: file, isExporting: $isExporting)
-                        .padding(.vertical, 6)
-                        .padding(.horizontal, 8)
-                        .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
-                }
-                TableColumn("Progress") { file in
-                    if let url = file.exportedURL, file.progress >= 1.0 {
-                        Button("Open Folder") {
-                            NSWorkspace.shared.open(url.deletingLastPathComponent())
-                        }
-                        .padding(.vertical, 6)
-                        .padding(.horizontal, 8)
-                        .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
-                    } else {
-                        ProgressBar(progress: file.progress)
-                            .frame(width: 100)
-                            .padding(.vertical, 6)
-                            .padding(.horizontal, 8)
-                            .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
-                    }
-                }
-                TableColumn("Exported Path") { file in
-                    Text(file.exportedURL?.path ?? "-")
-                        .lineLimit(1)
-                        .padding(.vertical, 6)
-                        .padding(.horizontal, 8)
-                        .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
-                }
-                TableColumn("") { file in
-                    Button(action: { audioFiles.removeAll { $0.id == file.id } }) {
-                        Image(systemName: "trash")
-                    }
-                    .buttonStyle(.borderless)
-                    .padding(.vertical, 6)
-                    .padding(.horizontal, 8)
-                    .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
-                }
-            }
-            .frame(minHeight: 200)
-            .onDrop(of: [UTType.fileURL.identifier], isTargeted: nil) { providers in
-                handleDrop(providers: providers)
-            }
-            HStack {
-                Button("Clear exported", action: clearExported)
-                    .disabled(!audioFiles.contains { $0.exportedURL != nil })
-                Spacer()
-                Button("Export files", action: exportFiles)
-                    .disabled(audioFiles.isEmpty || isExporting)
-            }
+    private var progressSection: some View {
+        Group {
             if isExporting {
                 ProgressView(value: exportProgress, total: 1.0)
                     .tint(.accentSecondary)
@@ -184,11 +211,6 @@ struct ContentView: View {
                     .foregroundColor(.green)
                     .padding(.vertical)
             }
-        }
-        .padding()
-        .background(Color.backgroundPrimary)
-        .fileImporter(isPresented: $isImporting, allowedContentTypes: AudioFileFormat.allowedUTTypes, allowsMultipleSelection: true) { result in
-            handleImport(result: result)
         }
     }
     
