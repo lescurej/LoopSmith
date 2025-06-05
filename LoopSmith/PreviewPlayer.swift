@@ -94,7 +94,7 @@ struct PreviewButton: View {
             }
         }
         .buttonStyle(.bordered)
-        .tint(.teal)
+        .tint(.accentSecondary)
         .disabled(isProcessing)
     }
 
