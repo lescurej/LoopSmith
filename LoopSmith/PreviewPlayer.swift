@@ -5,7 +5,7 @@ import CryptoKit
 
 private struct PreviewCache {
     private static func key(for file: AudioFileItem) -> String {
-        "\(file.url.path)-\(file.fadeDurationMs)-\(file.rhythmSync)-\(file.rhythmicRecomposition)-\(file.bpm ?? -1)"
+        "\(file.url.path)-\(file.fadeDurationMs)-\(file.crossfadeMode.rawValue)-\(file.bpm ?? -1)"
     }
 
     private static func hash(_ string: String) -> String {
@@ -120,9 +120,8 @@ struct PreviewButton: View {
             outputURL: tmpURL,
             fadeDurationMs: file.fadeDurationMs,
             format: file.format,
-            rhythmSync: file.rhythmSync,
+            crossfadeMode: file.crossfadeMode,
             bpm: file.bpm,
-            rhythmicRecomposition: file.rhythmicRecomposition,
             progress: nil
         ) { result in
             DispatchQueue.main.async {

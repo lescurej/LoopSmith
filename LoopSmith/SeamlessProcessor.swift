@@ -7,9 +7,8 @@ struct SeamlessProcessor {
                         outputURL: URL,
                         fadeDurationMs: Double,
                         format: AudioFileFormat,
-                        rhythmSync: Bool,
+                        crossfadeMode: CrossfadeMode,
                         bpm: Double?,
-                        rhythmicRecomposition: Bool,
                         progress: ((Double) -> Void)? = nil,
                         completion: @escaping (Result<Double, Error>) -> Void) {
 
@@ -38,6 +37,8 @@ struct SeamlessProcessor {
                 let total = Int(totalFrames)
                 let midFrame = total / 2
                 var fadeSamples = max(1, Int(sampleRate * fadeDurationMs / 1000.0))
+
+                let rhythmSync = (crossfadeMode == .rhythmicBPM)
 
                 if rhythmSync, let bpm = bpm {
                     let beatFrames = Int(sampleRate * 60.0 / bpm)
@@ -73,12 +74,6 @@ struct SeamlessProcessor {
                             off += step
                         }
                     }
-                }
-
-                // Placeholder for future rhythmic recomposition algorithm
-                // Currently this flag has no effect on processing
-                if rhythmicRecomposition {
-                    // TODO: implement algorithm
                 }
 
                 // 2. Création du buffer de sortie
