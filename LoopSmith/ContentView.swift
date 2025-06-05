@@ -59,6 +59,17 @@ struct ContentView: View {
                     ))
                     .labelsHidden()
                 }
+                TableColumn("Rhythmic Recomposition") { file in
+                    Toggle("", isOn: Binding(
+                        get: { file.rhythmicRecomposition },
+                        set: { newVal in
+                            if let idx = audioFiles.firstIndex(where: { $0.id == file.id }) {
+                                audioFiles[idx].rhythmicRecomposition = newVal
+                            }
+                        }
+                    ))
+                    .labelsHidden()
+                }
                 TableColumn("Preview") { file in
                     PreviewButton(file: file)
                 }
@@ -181,6 +192,7 @@ struct ContentView: View {
                     fadeDurationMs: file.fadeDurationMs,
                     format: selectedFormat,
                     rhythmSync: file.rhythmSync,
+                    rhythmicRecomposition: file.rhythmicRecomposition,
                     progress: { percent in
                         updateFileProgress(fileID: file.id, progress: percent)
                     }

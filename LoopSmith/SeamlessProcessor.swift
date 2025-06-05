@@ -8,6 +8,7 @@ struct SeamlessProcessor {
                         fadeDurationMs: Double,
                         format: AudioFileFormat,
                         rhythmSync: Bool,
+                        rhythmicRecomposition: Bool,
                         progress: ((Double) -> Void)? = nil,
                         completion: @escaping (Result<Double, Error>) -> Void) {
 
@@ -54,6 +55,12 @@ struct SeamlessProcessor {
                             }
                         }
                     }
+                }
+
+                // Placeholder for future rhythmic recomposition algorithm
+                // Currently this flag has no effect on processing
+                if rhythmicRecomposition {
+                    // TODO: implement algorithm
                 }
 
                 // 2. Création du buffer de sortie
