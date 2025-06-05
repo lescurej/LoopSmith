@@ -38,22 +38,12 @@ struct SeamlessProcessor {
                 let fadeSamples = max(1, Int(sampleRate * fadeDurationMs / 1000.0))
 
                 var offsetFrames = 0
-                if rhythmSync {
-                    let searchRange = min(fadeSamples, max(0, total - fadeSamples * 2))
-                    if searchRange > 0, numChannels > 0 {
-                        let channel = inputChannels[0]
-                        var bestScore: Float = .greatestFiniteMagnitude
-                        for off in (-searchRange)...searchRange {
-                            let endStart = total - fadeSamples + off
-                            if endStart < 0 || endStart + fadeSamples > total { continue }
-                            var diff: Float = 0
-                            vDSP_distancesq(channel + endStart, 1, channel, 1, &diff, vDSP_Length(fadeSamples))
-                            if diff < bestScore {
-                                bestScore = diff
-                                offsetFrames = off
-                            }
-                        }
-                    }
+                if rhythmSync, numChannels > 0 {
+                    let channel = inputChannels[0]
+                    offsetFrames = SpectralLoopAnalyzer.bestOffset(
+                        channel: channel,
+                        totalFrames: total,
+                        fadeSamples: fadeSamples)
                 }
 
                 // 2. Création du buffer de sortie
