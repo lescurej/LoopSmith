@@ -262,6 +262,7 @@ struct ContentView: View {
                     fadeDurationMs: file.fadeDurationMs,
                     format: selectedFormat,
                     rhythmSync: file.rhythmSync,
+                    bpm: file.bpm,
                     rhythmicRecomposition: file.rhythmicRecomposition,
                     progress: { percent in
                         updateFileProgress(fileID: file.id, progress: percent)

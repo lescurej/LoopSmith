@@ -8,6 +8,7 @@ struct SeamlessProcessor {
                         fadeDurationMs: Double,
                         format: AudioFileFormat,
                         rhythmSync: Bool,
+                        bpm: Double?,
                         rhythmicRecomposition: Bool,
                         progress: ((Double) -> Void)? = nil,
                         completion: @escaping (Result<Double, Error>) -> Void) {
@@ -36,7 +37,15 @@ struct SeamlessProcessor {
 
                 let total = Int(totalFrames)
                 let midFrame = total / 2
-                let fadeSamples = max(1, Int(sampleRate * fadeDurationMs / 1000.0))
+                var fadeSamples = max(1, Int(sampleRate * fadeDurationMs / 1000.0))
+
+                if rhythmSync, let bpm = bpm {
+                    let beatFrames = Int(sampleRate * 60.0 / bpm)
+                    if beatFrames > 0 {
+                        let multiples = max(1, Int(round(Double(fadeSamples) / Double(beatFrames))))
+                        fadeSamples = multiples * beatFrames
+                    }
+                }
 
                 var offsetFrames = 0
                 if rhythmSync {
@@ -44,15 +53,24 @@ struct SeamlessProcessor {
                     if searchRange > 0, numChannels > 0 {
                         let channel = inputChannels[0]
                         var bestScore: Float = .greatestFiniteMagnitude
-                        for off in (-searchRange)...searchRange {
+                        let step: Int
+                        if let bpm = bpm {
+                            step = max(1, Int(sampleRate * 60.0 / bpm))
+                        } else {
+                            step = 1
+                        }
+                        var off = -searchRange
+                        while off <= searchRange {
                             let endStart = total - fadeSamples + off
-                            if endStart < 0 || endStart + fadeSamples > total { continue }
-                            var diff: Float = 0
-                            vDSP_distancesq(channel + endStart, 1, channel, 1, &diff, vDSP_Length(fadeSamples))
-                            if diff < bestScore {
-                                bestScore = diff
-                                offsetFrames = off
+                            if endStart >= 0 && endStart + fadeSamples <= total {
+                                var diff: Float = 0
+                                vDSP_distancesq(channel + endStart, 1, channel, 1, &diff, vDSP_Length(fadeSamples))
+                                if diff < bestScore {
+                                    bestScore = diff
+                                    offsetFrames = off
+                                }
                             }
+                            off += step
                         }
                     }
                 }
