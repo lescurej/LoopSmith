@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		453BD7122DF18D64004481D3 /* Color+Palette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 453BD7112DF18D64004481D3 /* Color+Palette.swift */; };
+		453BD71D2DF19BA2004481D3 /* BPMDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 453BD71C2DF19BA2004481D3 /* BPMDetector.swift */; };
 		456A8A362DF0B2F8000FE6CB /* WaveformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456A8A352DF0B2F8000FE6CB /* WaveformView.swift */; };
 		456A8A382DF0B557000FE6CB /* PreviewPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456A8A372DF0B557000FE6CB /* PreviewPlayer.swift */; };
 		456A8A3A2DF0B55A000FE6CB /* ProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 456A8A392DF0B55A000FE6CB /* ProgressBar.swift */; };
@@ -21,6 +22,7 @@
 
 /* Begin PBXFileReference section */
 		453BD7112DF18D64004481D3 /* Color+Palette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Palette.swift"; sourceTree = "<group>"; };
+		453BD71C2DF19BA2004481D3 /* BPMDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BPMDetector.swift; sourceTree = "<group>"; };
 		456A8A352DF0B2F8000FE6CB /* WaveformView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaveformView.swift; sourceTree = "<group>"; };
 		456A8A372DF0B557000FE6CB /* PreviewPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewPlayer.swift; sourceTree = "<group>"; };
 		456A8A392DF0B55A000FE6CB /* ProgressBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressBar.swift; sourceTree = "<group>"; };
@@ -68,8 +70,8 @@
 				4593100C2DDE6C3B003E3A0B /* ContentView.swift */,
 				453BD7112DF18D64004481D3 /* Color+Palette.swift */,
 				456A8A352DF0B2F8000FE6CB /* WaveformView.swift */,
+				453BD71C2DF19BA2004481D3 /* BPMDetector.swift */,
 				4593101C2DDE6C9F003E3A0B /* AudioFileItem.swift */,
-				453BD71A2DF19358004481D3 /* BPMDetector.swift */,
 				456A8A372DF0B557000FE6CB /* PreviewPlayer.swift */,
 				456A8A392DF0B55A000FE6CB /* ProgressBar.swift */,
 				4593101B2DDE6C9F003E3A0B /* SeamlessProcessor.swift */,
@@ -160,10 +162,10 @@
 			files = (
 				4593100D2DDE6C3B003E3A0B /* ContentView.swift in Sources */,
 				456A8A382DF0B557000FE6CB /* PreviewPlayer.swift in Sources */,
+				453BD71D2DF19BA2004481D3 /* BPMDetector.swift in Sources */,
 				4593100B2DDE6C3B003E3A0B /* LoopSmithApp.swift in Sources */,
 				456A8A362DF0B2F8000FE6CB /* WaveformView.swift in Sources */,
 				459310202DDE6C9F003E3A0B /* AudioFileItem.swift in Sources */,
-				453BD71B2DF19358004481D3 /* BPMDetector.swift in Sources */,
 				4593101F2DDE6C9F003E3A0B /* SeamlessProcessor.swift in Sources */,
 				456A8A3A2DF0B55A000FE6CB /* ProgressBar.swift in Sources */,
 				453BD7122DF18D64004481D3 /* Color+Palette.swift in Sources */,
