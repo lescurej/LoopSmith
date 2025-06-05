@@ -22,16 +22,16 @@ struct ContentView: View {
                 )
                 .frame(height: 2)
             HStack {
-                Image("AppIcon")
+                Image("title")
                     .resizable()
-                    .frame(width: 20, height: 20)
-                    .cornerRadius(4)
-                Text("LoopSmith")
-                    .font(.headline)
-                    .bold()
+                    .aspectRatio(contentMode: .fit)
+                    .foregroundColor(Color("AccentColor"))
+                    .frame(maxWidth: .infinity, maxHeight: 50)
+                       
+                
                 Spacer()
             }
-            .padding(.bottom, 4)
+            .padding(.bottom, -15)
 
             HStack {
                 Button {
