@@ -8,12 +8,12 @@ struct SpectralLoopAnalyzer {
         let searchRange = min(fadeSamples, max(0, totalFrames - fadeSamples * 2))
         if searchRange <= 0 { return 0 }
 
-        // The vDSP.DFT initializer returns an optional instance.  If the
-        // transform cannot be created, simply return offset 0.
-        guard let dft = vDSP.DFT(count: fadeSamples,
-                                 direction: .forward,
-                                 transformType: .complexReal,
-                                 ofType: Float.self) else {
+        // The vDSP.DiscreteFourierTransform initializer returns an optional
+        // instance. If the transform cannot be created, simply return offset 0.
+        guard let dft = vDSP.DiscreteFourierTransform(count: fadeSamples,
+                                                      direction: .forward,
+                                                      transformType: .complexReal,
+                                                      ofType: Float.self) else {
             return 0
         }
 
@@ -25,7 +25,7 @@ struct SpectralLoopAnalyzer {
 
         var startReal = [Float](repeating: 0, count: fadeSamples/2)
         var startImag = [Float](repeating: 0, count: fadeSamples/2)
-        dft.transform(startSegment,
+        dft.transform(inputReal: startSegment,
                       outputReal: &startReal,
                       outputImaginary: &startImag)
         var startMag = [Float](repeating: 0, count: fadeSamples/2)
@@ -48,7 +48,7 @@ struct SpectralLoopAnalyzer {
             if endStart < 0 || endStart + fadeSamples > totalFrames { continue }
 
             vDSP_vmul(channel + endStart, 1, window, 1, &candidate, 1, vDSP_Length(fadeSamples))
-            dft.transform(candidate,
+            dft.transform(inputReal: candidate,
                           outputReal: &candReal,
                           outputImaginary: &candImag)
             for i in 0..<(fadeSamples/2) {
