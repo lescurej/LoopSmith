@@ -4,15 +4,14 @@ struct ProgressBar: View {
     var progress: Double
 
     var body: some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .leading) {
-                Rectangle()
-                    .fill(Color.gray.opacity(0.3))
-                Rectangle()
-                    .fill(Color.blue)
-                    .frame(width: CGFloat(max(0.0, min(1.0, progress))) * geometry.size.width)
-            }
-            .cornerRadius(4)
-        }
+        ProgressView(value: progress)
+            .progressViewStyle(.linear)
+            .tint(.blue)
+            .frame(height: 8)
+            .background(
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.gray.opacity(0.2))
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 4))
     }
 }

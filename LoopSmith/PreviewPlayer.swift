@@ -86,9 +86,15 @@ struct PreviewButton: View {
             if isProcessing {
                 ProgressView()
             } else {
-                Text(player.isPlaying ? "Stop" : "Preview")
+                Label {
+                    Text(player.isPlaying ? "Stop" : "Preview")
+                } icon: {
+                    Image(systemName: player.isPlaying ? "stop.fill" : "play.fill")
+                }
             }
         }
+        .buttonStyle(.bordered)
+        .tint(.teal)
         .disabled(isProcessing)
     }
 
