@@ -13,6 +13,7 @@ struct AudioFileItem: Identifiable {
     var exportedURL: URL? = nil
     var waveform: [Float] = []
     var rhythmSync: Bool = false
+    var bpm: Double? = nil
     let format: AudioFileFormat
 
     /// Returns the output URL for this file when exported to the given directory
@@ -29,7 +30,7 @@ struct AudioFileItem: Identifiable {
         return String(format: "%d:%02d", minutes, seconds)
     }
     
-    init(url: URL, fadeDurationMs: Double, duration: TimeInterval, waveform: [Float] = [], rhythmSync: Bool = false) {
+    init(url: URL, fadeDurationMs: Double, duration: TimeInterval, waveform: [Float] = [], rhythmSync: Bool = false, bpm: Double? = nil) {
         self.url = url
         self.fileName = url.lastPathComponent
         self.fadeDurationMs = fadeDurationMs
@@ -40,6 +41,7 @@ struct AudioFileItem: Identifiable {
         self.duration = duration
         self.waveform = waveform
         self.rhythmSync = rhythmSync
+        self.bpm = bpm
     }
     
     static func load(url: URL, completion: @escaping (AudioFileItem?) -> Void) {
@@ -51,8 +53,10 @@ struct AudioFileItem: Identifiable {
                     let seconds = CMTimeGetSeconds(duration)
                     let fadeDurationMs = seconds * 1000 * 0.15
                     let waveform = generateWaveform(url: url)
+                    let bpm = BPMDetector.detect(url: url)
+                    let adjustedFade = bpm != nil ? (60.0 / (bpm!)) * 4 * 1000 : fadeDurationMs
                     DispatchQueue.main.async {
-                        completion(AudioFileItem(url: url, fadeDurationMs: fadeDurationMs, duration: seconds, waveform: waveform))
+                        completion(AudioFileItem(url: url, fadeDurationMs: adjustedFade, duration: seconds, waveform: waveform, rhythmSync: false, bpm: bpm))
                     }
                 } catch {
                     DispatchQueue.main.async {
@@ -68,8 +72,10 @@ struct AudioFileItem: Identifiable {
                     let duration = CMTimeGetSeconds(asset.duration)
                     let fadeDurationMs = duration * 1000 * 0.15
                     let waveform = generateWaveform(url: url)
+                    let bpm = BPMDetector.detect(url: url)
+                    let adjustedFade = bpm != nil ? (60.0 / (bpm!)) * 4 * 1000 : fadeDurationMs
                     DispatchQueue.main.async {
-                        completion(AudioFileItem(url: url, fadeDurationMs: fadeDurationMs, duration: duration, waveform: waveform))
+                        completion(AudioFileItem(url: url, fadeDurationMs: adjustedFade, duration: duration, waveform: waveform, rhythmSync: false, bpm: bpm))
                     }
                 } else {
                     DispatchQueue.main.async {
