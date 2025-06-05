@@ -8,10 +8,12 @@ struct SpectralLoopAnalyzer {
         let searchRange = min(fadeSamples, max(0, totalFrames - fadeSamples * 2))
         if searchRange <= 0 { return 0 }
 
-        guard let dft = vDSP.DiscreteFourierTransform(count: fadeSamples,
-                                 direction: .forward,
-                                 transformType: .complexReal,
-                                 ofType: Float.self) else {
+        // The vDSP.DFT initializer can throw and returns a concrete instance
+        // rather than an optional. Use `try?` so failures simply return 0.
+        guard let dft = try? vDSP.DFT(count: fadeSamples,
+                                      direction: .forward,
+                                      transformType: .complexReal,
+                                      ofType: Float.self) else {
             return 0
         }
 
