@@ -11,7 +11,7 @@ struct SpectralLoopAnalyzer {
         let log2n = vDSP_Length(log2(Double(fadeSamples)))
         guard let dft = vDSP.DFT(count: fadeSamples,
                                  direction: .forward,
-                                 transformType: .realComplex,
+                                 transformType: .realForward,
                                  ofType: Float.self) else {
             return 0
         }
