@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		453BD7192DF192D7004481D3 /* SpectralLoopAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 453BD7182DF192D7004481D3 /* SpectralLoopAnalyzer.swift */; };
 		453BD7122DF18D64004481D3 /* Color+Palette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 453BD7112DF18D64004481D3 /* Color+Palette.swift */; };
 		453BD71D2DF19BA2004481D3 /* BPMDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 453BD71C2DF19BA2004481D3 /* BPMDetector.swift */; };
 		453BD7212DF1AA85004481D3 /* CrossfadeMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 453BD7202DF1AA85004481D3 /* CrossfadeMode.swift */; };
@@ -23,6 +24,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		453BD7182DF192D7004481D3 /* SpectralLoopAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpectralLoopAnalyzer.swift; sourceTree = "<group>"; };
 		453BD7112DF18D64004481D3 /* Color+Palette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Palette.swift"; sourceTree = "<group>"; };
 		453BD71C2DF19BA2004481D3 /* BPMDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BPMDetector.swift; sourceTree = "<group>"; };
 		453BD7202DF1AA85004481D3 /* CrossfadeMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossfadeMode.swift; sourceTree = "<group>"; };
@@ -79,6 +81,7 @@
 				4593101C2DDE6C9F003E3A0B /* AudioFileItem.swift */,
 				453BD7202DF1AA85004481D3 /* CrossfadeMode.swift */,
 				456A8A372DF0B557000FE6CB /* PreviewPlayer.swift */,
+				453BD7182DF192D7004481D3 /* SpectralLoopAnalyzer.swift */,
 				456A8A392DF0B55A000FE6CB /* ProgressBar.swift */,
 				4593101B2DDE6C9F003E3A0B /* SeamlessProcessor.swift */,
 				4593100E2DDE6C3D003E3A0B /* Assets.xcassets */,
@@ -124,7 +127,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1520;
-				LastUpgradeCheck = 1520;
+				LastUpgradeCheck = 1630;
 				TargetAttributes = {
 					459310062DDE6C3B003E3A0B = {
 						CreatedOnToolsVersion = 15.2;
@@ -171,6 +174,7 @@
 				456A8A382DF0B557000FE6CB /* PreviewPlayer.swift in Sources */,
 				453BD71D2DF19BA2004481D3 /* BPMDetector.swift in Sources */,
 				4593100B2DDE6C3B003E3A0B /* LoopSmithApp.swift in Sources */,
+				453BD7192DF192D7004481D3 /* SpectralLoopAnalyzer.swift in Sources */,
 				456A8A362DF0B2F8000FE6CB /* WaveformView.swift in Sources */,
 				459310202DDE6C9F003E3A0B /* AudioFileItem.swift in Sources */,
 				4593101F2DDE6C9F003E3A0B /* SeamlessProcessor.swift in Sources */,
@@ -217,7 +221,9 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = RT9W4VJ635;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -280,7 +286,9 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = RT9W4VJ635;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -311,8 +319,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"LoopSmith/Preview Content\"";
-				DEVELOPMENT_TEAM = RT9W4VJ635;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -321,6 +329,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.johanlescure.LoopSmith;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -339,8 +348,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"LoopSmith/Preview Content\"";
-				DEVELOPMENT_TEAM = RT9W4VJ635;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -349,6 +358,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.johanlescure.LoopSmith;
 				PRODUCT_NAME = "$(TARGET_NAME)";

@@ -74,6 +74,12 @@ struct SeamlessProcessor {
                             off += step
                         }
                     }
+                if analyzePerfectPoint, numChannels > 0 {
+                    let channel = inputChannels[0]
+                    offsetFrames = SpectralLoopAnalyzer.bestOffset(
+                        channel: channel,
+                        totalFrames: total,
+                        fadeSamples: fadeSamples)
                 }
 
                 // 2. Création du buffer de sortie

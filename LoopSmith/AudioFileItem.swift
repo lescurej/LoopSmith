@@ -12,8 +12,10 @@ struct AudioFileItem: Identifiable {
     var progress: Double = 0.0
     var exportedURL: URL? = nil
     var waveform: [Float] = []
-    var crossfadeMode: CrossfadeMode = .manual
+    var analyzePerfectPoint: Bool = false
+  	var crossfadeMode: CrossfadeMode = .manual
     var bpm: Double? = nil
+    var analyzePerfectPoint: Bool = false
     let format: AudioFileFormat
 
     /// Returns the output URL for this file when exported to the given directory
@@ -30,7 +32,7 @@ struct AudioFileItem: Identifiable {
         return String(format: "%d:%02d", minutes, seconds)
     }
     
-    init(url: URL, fadeDurationMs: Double, duration: TimeInterval, waveform: [Float] = [], crossfadeMode: CrossfadeMode = .manual, bpm: Double? = nil) {
+    init(url: URL, fadeDurationMs: Double, duration: TimeInterval, waveform: [Float] = [], crossfadeMode: CrossfadeMode = .manual, bpm: Double? = nil, analyzePerfectPoint: Bool = false) {
         self.url = url
         self.fileName = url.lastPathComponent
         self.fadeDurationMs = fadeDurationMs
@@ -40,6 +42,7 @@ struct AudioFileItem: Identifiable {
         self.format = format
         self.duration = duration
         self.waveform = waveform
+        self.analyzePerfectPoint = analyzePerfectPoint
         self.crossfadeMode = crossfadeMode
         self.bpm = bpm
     }
