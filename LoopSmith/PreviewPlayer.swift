@@ -78,13 +78,16 @@ class PreviewPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
 
 struct PreviewButton: View {
     var file: AudioFileItem
+    @Binding var isExporting: Bool
     @StateObject private var player = PreviewPlayer()
     @State private var isProcessing = false
+    @State private var progress: Double = 0.0
 
     var body: some View {
         Button(action: toggle) {
             if isProcessing {
-                ProgressView()
+                GradientProgressBar(progress: progress)
+                    .frame(width: 80)
             } else {
                 Label {
                     Text(player.isPlaying ? "Stop" : "Preview")
@@ -96,6 +99,12 @@ struct PreviewButton: View {
         .buttonStyle(.bordered)
         .tint(.accentSecondary)
         .disabled(isProcessing)
+        .onChange(of: isExporting) { exporting in
+            if exporting {
+                player.stop()
+                isProcessing = false
+            }
+        }
     }
 
     private func toggle() {
@@ -113,6 +122,7 @@ struct PreviewButton: View {
         }
 
         isProcessing = true
+        progress = 0.0
         let tmpURL = PreviewCache.url(for: file)
 
         SeamlessProcessor.process(
@@ -122,10 +132,15 @@ struct PreviewButton: View {
             format: file.format,
             rhythmSync: file.rhythmSync,
             rhythmicRecomposition: file.rhythmicRecomposition,
-            progress: nil
+            progress: { percent in
+                DispatchQueue.main.async {
+                    self.progress = percent
+                }
+            }
         ) { result in
             DispatchQueue.main.async {
                 self.isProcessing = false
+                guard !isExporting else { return }
                 switch result {
                 case .success(let centerTime):
                     PreviewCache.store(file: file, url: tmpURL, center: centerTime)

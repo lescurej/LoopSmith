@@ -85,6 +85,8 @@ struct ContentView: View {
                             }
                         ), in: 0...100)
                         .tint(.accentColor)
+                        .controlSize(.small)
+                        .frame(width: 150)
                         .padding(.horizontal, 4)
 
                         Circle()
@@ -124,7 +126,7 @@ struct ContentView: View {
                     .labelsHidden()
                 }
                 TableColumn("Preview") { file in
-                    PreviewButton(file: file)
+                    PreviewButton(file: file, isExporting: $isExporting)
                         .padding(.vertical, 6)
                         .padding(.horizontal, 8)
                         .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
