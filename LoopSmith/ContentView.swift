@@ -73,7 +73,7 @@ struct ContentView: View {
                         .padding(.horizontal, 8)
                         .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
                 }
-                TableColumn("Fade (%)") { file in
+                TableColumn("Fade (%)", width: .min(200, ideal: 260)) { file in
                     let percent = file.duration > 0 ? (file.fadeDurationMs / (file.duration * 1000)) * 100 : 0
                     HStack {
                         Slider(value: Binding(
@@ -86,7 +86,7 @@ struct ContentView: View {
                         ), in: 0...100)
                         .tint(.accentColor)
                         .controlSize(.small)
-                        .frame(width: 150)
+                        .frame(maxWidth: .infinity)
                         .padding(.horizontal, 4)
 
                         Circle()
