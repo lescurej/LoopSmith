@@ -8,11 +8,13 @@
 
 import SwiftUI
 
+
 @main
 struct LoopSmithApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .accentColor(.accentMain)
         }
     }
 }

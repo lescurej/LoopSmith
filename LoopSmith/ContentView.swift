@@ -12,6 +12,15 @@ struct ContentView: View {
 
     var body: some View {
         VStack(alignment: .leading) {
+            Rectangle()
+                .fill(
+                    LinearGradient(
+                        gradient: Gradient(colors: [.accentMain, .accentSecondary]),
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .frame(height: 2)
             HStack {
                 Image("AppIcon")
                     .resizable()
@@ -32,6 +41,7 @@ struct ContentView: View {
                         .padding(.horizontal)
                 }
                 .buttonStyle(.borderedProminent)
+                .tint(.accentMain)
 
                 Spacer()
 
@@ -45,23 +55,23 @@ struct ContentView: View {
                 TableColumn("Name") { file in
                     Text(file.fileName)
                         .font(.body)
-                        .padding(.vertical, 4)
-                        .padding(.horizontal, 6)
-                        .background(RoundedRectangle(cornerRadius: 6).fill(Color.gray.opacity(0.1)))
+                        .padding(.vertical, 6)
+                        .padding(.horizontal, 8)
+                        .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
                 }
                 TableColumn("Duration") { file in
                     Text(file.durationString)
                         .monospacedDigit()
-                        .padding(.vertical, 4)
-                        .padding(.horizontal, 6)
-                        .background(RoundedRectangle(cornerRadius: 6).fill(Color.gray.opacity(0.1)))
+                        .padding(.vertical, 6)
+                        .padding(.horizontal, 8)
+                        .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
                 }
                 TableColumn("Waveform") { file in
                     WaveformView(samples: file.waveform)
                         .frame(height: 30)
-                        .padding(.vertical, 4)
-                        .padding(.horizontal, 6)
-                        .background(RoundedRectangle(cornerRadius: 6).fill(Color.gray.opacity(0.1)))
+                        .padding(.vertical, 6)
+                        .padding(.horizontal, 8)
+                        .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
                 }
                 TableColumn("Fade (%)") { file in
                     let percent = file.duration > 0 ? (file.fadeDurationMs / (file.duration * 1000)) * 100 : 0
@@ -84,9 +94,9 @@ struct ContentView: View {
                         Text(String(format: "%.0f%%", percent))
                             .monospacedDigit()
                     }
-                    .padding(.vertical, 4)
-                    .padding(.horizontal, 6)
-                    .background(RoundedRectangle(cornerRadius: 6).fill(Color.gray.opacity(0.1)))
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 8)
+                    .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
                 }
                 TableColumn("Rhythm Sync") { file in
                     Toggle("", isOn: Binding(
@@ -98,47 +108,47 @@ struct ContentView: View {
                         }
                     ))
                     .labelsHidden()
-                    .padding(.vertical, 4)
-                    .padding(.horizontal, 6)
-                    .background(RoundedRectangle(cornerRadius: 6).fill(Color.gray.opacity(0.1)))
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 8)
+                    .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
                 }
                 TableColumn("Preview") { file in
                     PreviewButton(file: file)
-                        .padding(.vertical, 4)
-                        .padding(.horizontal, 6)
-                        .background(RoundedRectangle(cornerRadius: 6).fill(Color.gray.opacity(0.1)))
+                        .padding(.vertical, 6)
+                        .padding(.horizontal, 8)
+                        .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
                 }
                 TableColumn("Progress") { file in
                     if let url = file.exportedURL, file.progress >= 1.0 {
                         Button("Open Folder") {
                             NSWorkspace.shared.open(url.deletingLastPathComponent())
                         }
-                        .padding(.vertical, 4)
-                        .padding(.horizontal, 6)
-                        .background(RoundedRectangle(cornerRadius: 6).fill(Color.gray.opacity(0.1)))
+                        .padding(.vertical, 6)
+                        .padding(.horizontal, 8)
+                        .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
                     } else {
                         ProgressBar(progress: file.progress)
                             .frame(width: 100)
-                            .padding(.vertical, 4)
-                            .padding(.horizontal, 6)
-                            .background(RoundedRectangle(cornerRadius: 6).fill(Color.gray.opacity(0.1)))
+                            .padding(.vertical, 6)
+                            .padding(.horizontal, 8)
+                            .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
                     }
                 }
                 TableColumn("Exported Path") { file in
                     Text(file.exportedURL?.path ?? "-")
                         .lineLimit(1)
-                        .padding(.vertical, 4)
-                        .padding(.horizontal, 6)
-                        .background(RoundedRectangle(cornerRadius: 6).fill(Color.gray.opacity(0.1)))
+                        .padding(.vertical, 6)
+                        .padding(.horizontal, 8)
+                        .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
                 }
                 TableColumn("") { file in
                     Button(action: { audioFiles.removeAll { $0.id == file.id } }) {
                         Image(systemName: "trash")
                     }
                     .buttonStyle(.borderless)
-                    .padding(.vertical, 4)
-                    .padding(.horizontal, 6)
-                    .background(RoundedRectangle(cornerRadius: 6).fill(Color.gray.opacity(0.1)))
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 8)
+                    .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
                 }
             }
             .frame(minHeight: 200)
@@ -154,6 +164,7 @@ struct ContentView: View {
             }
             if isExporting {
                 ProgressView(value: exportProgress, total: 1.0)
+                    .tint(.accentSecondary)
                     .padding(.vertical)
             } else if exportCompleted {
                 Text("Export terminé")
@@ -162,6 +173,7 @@ struct ContentView: View {
             }
         }
         .padding()
+        .background(Color.backgroundPrimary)
         .fileImporter(isPresented: $isImporting, allowedContentTypes: AudioFileFormat.allowedUTTypes, allowsMultipleSelection: true) { result in
             handleImport(result: result)
         }

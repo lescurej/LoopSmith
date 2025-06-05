@@ -16,7 +16,7 @@ struct WaveformView: View {
                     path.addLine(to: CGPoint(x: x, y: height - y))
                 }
             }
-            .stroke(Color.blue, lineWidth: 1)
+            .stroke(Color.accentSecondary, lineWidth: 1)
         }
     }
 }

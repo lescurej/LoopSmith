@@ -6,7 +6,7 @@ struct ProgressBar: View {
     var body: some View {
         ProgressView(value: progress)
             .progressViewStyle(.linear)
-            .tint(.blue)
+            .tint(.accentSecondary)
             .frame(height: 8)
             .background(
                 RoundedRectangle(cornerRadius: 4)
