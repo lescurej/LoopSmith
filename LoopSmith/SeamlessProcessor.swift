@@ -7,7 +7,7 @@ struct SeamlessProcessor {
                         outputURL: URL,
                         fadeDurationMs: Double,
                         format: AudioFileFormat,
-                        rhythmSync: Bool,
+                        analyzePerfectPoint: Bool,
                         progress: ((Double) -> Void)? = nil,
                         completion: @escaping (Result<Double, Error>) -> Void) {
 
@@ -38,7 +38,7 @@ struct SeamlessProcessor {
                 let fadeSamples = max(1, Int(sampleRate * fadeDurationMs / 1000.0))
 
                 var offsetFrames = 0
-                if rhythmSync, numChannels > 0 {
+                if analyzePerfectPoint, numChannels > 0 {
                     let channel = inputChannels[0]
                     offsetFrames = SpectralLoopAnalyzer.bestOffset(
                         channel: channel,
