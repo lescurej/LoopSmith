@@ -11,7 +11,7 @@ struct SpectralLoopAnalyzer {
         let log2n = vDSP_Length(log2(Double(fadeSamples)))
         guard let dft = vDSP.DFT(count: fadeSamples,
                                  direction: .forward,
-                                 transformType: .real,
+                                 transformType: .realComplex,
                                  ofType: Float.self) else {
             return 0
         }
@@ -26,8 +26,11 @@ struct SpectralLoopAnalyzer {
         var startImag = [Float](repeating: 0, count: fadeSamples/2)
         dft.transform(startSegment, realOutput: &startReal, imaginaryOutput: &startImag)
         var startMag = [Float](repeating: 0, count: fadeSamples/2)
-        vDSP.squareMagnitudes(startReal, startImag, result: &startMag)
-        vDSP.sqrt(startMag, result: &startMag)
+        for i in 0..<(fadeSamples/2) {
+            let r = startReal[i]
+            let im = startImag[i]
+            startMag[i] = sqrt(r * r + im * im)
+        }
 
         var candidate = [Float](repeating: 0, count: fadeSamples)
         var candReal = [Float](repeating: 0, count: fadeSamples/2)
@@ -43,11 +46,17 @@ struct SpectralLoopAnalyzer {
 
             vDSP_vmul(channel + endStart, 1, window, 1, &candidate, 1, vDSP_Length(fadeSamples))
             dft.transform(candidate, realOutput: &candReal, imaginaryOutput: &candImag)
-            vDSP.squareMagnitudes(candReal, candImag, result: &candMag)
-            vDSP.sqrt(candMag, result: &candMag)
+            for i in 0..<(fadeSamples/2) {
+                let r = candReal[i]
+                let im = candImag[i]
+                candMag[i] = sqrt(r * r + im * im)
+            }
 
             var diff: Float = 0
-            vDSP_distancesq(&candMag, 1, &startMag, 1, &diff, vDSP_Length(fadeSamples/2))
+            for i in 0..<(fadeSamples/2) {
+                let delta = candMag[i] - startMag[i]
+                diff += delta * delta
+            }
             if diff < bestScore {
                 bestScore = diff
                 bestOffset = off
