@@ -179,9 +179,7 @@ struct ContentView: View {
                         .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
                 }
             }
-            .frame(minHeight: 200)
-            .onDrop(of: [UTType.fileURL.identifier], isTargeted: nil) { providers in
-                handleDrop(providers: providers)
+
             TableColumn("Exported Path") { file in
                 Text(file.exportedURL?.path ?? "-")
                     .lineLimit(1)
@@ -189,6 +187,7 @@ struct ContentView: View {
                     .padding(.horizontal, 8)
                     .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
             }
+
             TableColumn("") { file in
                 Button(action: { audioFiles.removeAll { $0.id == file.id } }) {
                     Image(systemName: "trash")
