@@ -94,20 +94,26 @@ struct ContentView: View {
                     .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
             }
             TableColumn("Fade (%)", width: .min(200, ideal: 260)) { file in
-                let percent = file.duration > 0 ? (file.fadeDurationMs / (file.duration * 1000)) * 100 : 0
-                HStack {
-                    Slider(value: Binding(
-                        get: { percent },
-                        set: { newPercent in
-                            if let idx = audioFiles.firstIndex(where: { $0.id == file.id }) {
-                                audioFiles[idx].fadeDurationMs = (newPercent / 100) * audioFiles[idx].duration * 1000
-                            }
+                let fadeBinding: Binding<Double> = Binding(
+                    get: {
+                        file.duration > 0
+                        ? (file.fadeDurationMs / (file.duration * 1000)) * 100
+                        : 0
+                    },
+                    set: { newPercent in
+                        if let idx = audioFiles.firstIndex(where: { $0.id == file.id }) {
+                            audioFiles[idx].fadeDurationMs =
+                                (newPercent / 100) * audioFiles[idx].duration * 1000
                         }
-                    ), in: 0...100)
-                    .tint(.accentColor)
-                    .controlSize(.small)
-                    .frame(maxWidth: .infinity)
-                    .padding(.horizontal, 4)
+                    }
+                )
+                let percent = fadeBinding.wrappedValue
+                HStack {
+                    Slider(value: fadeBinding, in: 0...100)
+                        .tint(.accentColor)
+                        .controlSize(.small)
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, 4)
 
                     Circle()
                         .fill(gradientColor(for: percent))
@@ -121,29 +127,31 @@ struct ContentView: View {
                 .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
             }
             TableColumn("Rhythm Sync") { file in
-                Toggle("", isOn: Binding(
+                let rhythmBinding: Binding<Bool> = Binding(
                     get: { file.rhythmSync },
                     set: { newVal in
                         if let idx = audioFiles.firstIndex(where: { $0.id == file.id }) {
                             audioFiles[idx].rhythmSync = newVal
                         }
                     }
-                ))
-                .labelsHidden()
-                .padding(.vertical, 6)
-                .padding(.horizontal, 8)
-                .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
+                )
+                Toggle("", isOn: rhythmBinding)
+                    .labelsHidden()
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 8)
+                    .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
             }
             TableColumn("Rhythmic Recomposition") { file in
-                Toggle("", isOn: Binding(
+                let recompositionBinding: Binding<Bool> = Binding(
                     get: { file.rhythmicRecomposition },
                     set: { newVal in
                         if let idx = audioFiles.firstIndex(where: { $0.id == file.id }) {
                             audioFiles[idx].rhythmicRecomposition = newVal
                         }
                     }
-                ))
-                .labelsHidden()
+                )
+                Toggle("", isOn: recompositionBinding)
+                    .labelsHidden()
             }
             TableColumn("Preview") { file in
                 PreviewButton(file: file, isExporting: $isExporting)
