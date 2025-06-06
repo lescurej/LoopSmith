@@ -20,4 +20,5 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
         with:
+          token: ${{ secrets.GITHUB_TOKEN_WITH_REPO_SCOPE }}
           files: LoopSmith-${{ github.ref_name }}.dmg
