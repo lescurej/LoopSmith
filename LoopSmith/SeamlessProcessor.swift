@@ -17,7 +17,7 @@ struct SeamlessProcessor {
                 DispatchQueue.main.async {
                     progress?(0.0)
                 }
-                // 1. Lecture du fichier audio source
+                // 1. Reading the source audio file
                 let inputFile = try AVAudioFile(forReading: inputURL)
                 let formatDesc = inputFile.processingFormat
                 let totalFrames = AVAudioFrameCount(inputFile.length)
@@ -25,13 +25,13 @@ struct SeamlessProcessor {
                 let numChannels = Int(formatDesc.channelCount)
 
                 guard let inputBuffer = AVAudioPCMBuffer(pcmFormat: formatDesc, frameCapacity: totalFrames) else {
-                    throw NSError(domain: "SeamlessProcessor", code: 1, userInfo: [NSLocalizedDescriptionKey: "Impossible d'allouer le buffer d'entrée"])
+                    throw NSError(domain: "SeamlessProcessor", code: 1, userInfo: [NSLocalizedDescriptionKey: "Unable to allocate input buffer"])
                 }
 
                 try inputFile.read(into: inputBuffer)
 
                 guard let inputChannels = inputBuffer.floatChannelData else {
-                    throw NSError(domain: "SeamlessProcessor", code: 2, userInfo: [NSLocalizedDescriptionKey: "Impossible d'accéder aux données audio"])
+                    throw NSError(domain: "SeamlessProcessor", code: 2, userInfo: [NSLocalizedDescriptionKey: "Unable to access audio data"])
                 }
 
                 let total = Int(totalFrames)
@@ -85,30 +85,30 @@ struct SeamlessProcessor {
                         fadeSamples: fadeSamples)
                 }
 
-                // 2. Création du buffer de sortie
+                // 2. Creating the output buffer
                 guard let outputBuffer = AVAudioPCMBuffer(pcmFormat: formatDesc, frameCapacity: totalFrames) else {
-                    throw NSError(domain: "SeamlessProcessor", code: 3, userInfo: [NSLocalizedDescriptionKey: "Impossible d'allouer le buffer de sortie"])
+                    throw NSError(domain: "SeamlessProcessor", code: 3, userInfo: [NSLocalizedDescriptionKey: "Unable to allocate output buffer"])
                 }
 
                 outputBuffer.frameLength = totalFrames
 
                 guard let outputChannels = outputBuffer.floatChannelData else {
-                    throw NSError(domain: "SeamlessProcessor", code: 4, userInfo: [NSLocalizedDescriptionKey: "Impossible d'accéder au buffer de sortie"])
+                    throw NSError(domain: "SeamlessProcessor", code: 4, userInfo: [NSLocalizedDescriptionKey: "Unable to access output buffer"])
                 }
 
-                // 3. Traitement parallèle par canal
+                // 3. Parallel processing by channel
                 for ch in 0..<numChannels {
                     let input = inputChannels[ch]
                     let output = outputChannels[ch]
 
-                    // Copie initiale du fichier complet
+                    // Initial copy of the complete file
                     output.assign(from: input, count: total)
 
-                    // Calcul de la longueur de fondu
+                    // Calculating fade length
                     let fade = min(fadeSamples, total / 2)
                     let rightLen = total - midFrame
 
-                    // Fondu entre la fin et le début du fichier (gain constant)
+                    // Fade between end and beginning of file (constant gain)
                     if fade > 1 {
                         let endStart = total - fade + offsetFrames
                         for i in 0..<fade {
@@ -122,7 +122,7 @@ struct SeamlessProcessor {
                         }
                     }
 
-                    // Décalage du fichier pour que la zone de fondu soit au centre
+                    // Shifting the file so the fade zone is centered
                     let temp = UnsafeMutablePointer<Float>.allocate(capacity: total)
                     temp.initialize(repeating: 0, count: total)
                     defer { temp.deallocate() }
@@ -131,14 +131,14 @@ struct SeamlessProcessor {
                     temp.advanced(by: rightLen).assign(from: output, count: midFrame)
                     output.assign(from: temp, count: total)
 
-                    // Appel du callback de progression
+                    // Progress callback
                     let percent = Double(ch + 1) / Double(numChannels)
                     DispatchQueue.main.async {
                         progress?(percent)
                     }
                 }
 
-                // 4. Conversion en buffer interleaved si nécessaire
+                // 4. Converting to interleaved buffer if needed
                 let isAIFF = (format == .aiff)
                 let settings: [String: Any] = [
                     AVFormatIDKey: kAudioFormatLinearPCM,
@@ -156,7 +156,7 @@ struct SeamlessProcessor {
                                                              interleaved: true),
                       let interleavedBuffer = AVAudioPCMBuffer(pcmFormat: interleavedFormat,
                                                                 frameCapacity: outputBuffer.frameCapacity) else {
-                    throw NSError(domain: "SeamlessProcessor", code: 5, userInfo: [NSLocalizedDescriptionKey: "Erreur lors de la création du buffer interleaved"])
+                    throw NSError(domain: "SeamlessProcessor", code: 5, userInfo: [NSLocalizedDescriptionKey: "Error creating interleaved buffer"])
                 }
 
                 interleavedBuffer.frameLength = outputBuffer.frameLength
@@ -171,7 +171,7 @@ struct SeamlessProcessor {
                     }
                 }
 
-                // 5. Écriture du fichier
+                // 5. Writing the file
                 if FileManager.default.fileExists(atPath: outputURL.path) {
                     try FileManager.default.removeItem(at: outputURL)
                 }

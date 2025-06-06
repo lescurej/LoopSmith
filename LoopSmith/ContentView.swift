@@ -94,7 +94,7 @@ struct ContentView: View {
                     .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
             }
             TableColumn("Fade (%)") { file in
-                // 1️⃣ Calculer d’abord le pourcentage
+                // 1️⃣ Calculate the percentage first
                 let percent: Double = {
                     guard file.duration > 0 else { return 0 }
                     return (file.fadeDurationMs / (file.duration * 1_000)) * 100
@@ -221,7 +221,7 @@ struct ContentView: View {
                     .tint(.accentSecondary)
                     .padding(.vertical)
             } else if exportCompleted {
-                Text("Export terminé")
+                Text("Export completed")
                     .foregroundColor(.green)
                     .padding(.vertical)
             }
