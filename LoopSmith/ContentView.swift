@@ -41,8 +41,8 @@ struct ContentView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .foregroundColor(Color("AccentColor"))
+                    .padding(.top, 5.0)
                     .frame(maxWidth: .infinity, maxHeight: 50)
-
 
                 Spacer()
             }
@@ -93,21 +93,34 @@ struct ContentView: View {
                     .padding(.horizontal, 8)
                     .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
             }
-            TableColumn("Fade (%)", width: .min(200, ideal: 260)) { file in
-                let percent = file.duration > 0 ? (file.fadeDurationMs / (file.duration * 1000)) * 100 : 0
-                HStack {
-                    Slider(value: Binding(
-                        get: { percent },
-                        set: { newPercent in
-                            if let idx = audioFiles.firstIndex(where: { $0.id == file.id }) {
-                                audioFiles[idx].fadeDurationMs = (newPercent / 100) * audioFiles[idx].duration * 1000
-                            }
+            TableColumn("Fade (%)") { file in
+                // 1️⃣ Calculer d’abord le pourcentage
+                let percent: Double = {
+                    guard file.duration > 0 else { return 0 }
+                    return (file.fadeDurationMs / (file.duration * 1_000)) * 100
+                }()
+
+                // 2️⃣ Créer un Binding<Double> pour le Slider
+                let fadeBinding = Binding<Double>(
+                    get: {
+                        guard let idx = audioFiles.firstIndex(where: { $0.id == file.id }) else { return percent }
+                        let f = audioFiles[idx]
+                        return (f.duration > 0) ? (f.fadeDurationMs / (f.duration * 1_000)) * 100 : 0
+                    },
+                    set: { newPercent in
+                        if let idx = audioFiles.firstIndex(where: { $0.id == file.id }) {
+                            audioFiles[idx].fadeDurationMs = (newPercent / 100) * audioFiles[idx].duration * 1_000
                         }
-                    ), in: 0...100)
-                    .tint(.accentColor)
-                    .controlSize(.small)
-                    .frame(maxWidth: .infinity)
-                    .padding(.horizontal, 4)
+                    }
+                )
+
+                // 3️⃣ Construire le HStack avec Slider, pastille colorée et texte
+                HStack {
+                    Slider(value: fadeBinding, in: 0...100)
+                        .tint(.accentColor)
+                        .controlSize(.small)
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, 4)
 
                     Circle()
                         .fill(gradientColor(for: percent))
@@ -118,8 +131,14 @@ struct ContentView: View {
                 }
                 .padding(.vertical, 6)
                 .padding(.horizontal, 8)
-                .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
+                .background(
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(Color.backgroundSecondary)
+                )
             }
+            // Appliquer le modificateur `.width(min:ideal:)` à la colonne Fade (%)
+            .width(min: 200, ideal: 260)
+
             TableColumn("Rhythm Sync") { file in
                 Toggle("", isOn: Binding(
                     get: { file.rhythmSync },
@@ -213,7 +232,7 @@ struct ContentView: View {
             }
         }
     }
-    
+
     private func handleImport(result: Result<[URL], Error>) {
         switch result {
         case .success(let urls):
@@ -236,7 +255,7 @@ struct ContentView: View {
             if provider.hasItemConformingToTypeIdentifier(UTType.fileURL.identifier) {
                 provider.loadItem(forTypeIdentifier: UTType.fileURL.identifier, options: nil) { (data, _) in
                     if let urlData = data as? Data,
-                       let url = NSURL(absoluteURLWithDataRepresentation: urlData, relativeTo: nil) as URL? ,
+                       let url = NSURL(absoluteURLWithDataRepresentation: urlData, relativeTo: nil) as URL?,
                        AudioFileFormat(url: url) != nil {
                         AudioFileItem.load(url: url) { item in
                             if let item = item {
@@ -251,7 +270,7 @@ struct ContentView: View {
         }
         return true
     }
-    
+
     private func exportFiles() {
         let panel = NSOpenPanel()
         panel.canChooseDirectories = true
