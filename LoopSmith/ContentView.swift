@@ -180,9 +180,10 @@ struct ContentView: View {
                 }
             }
             .frame(minHeight: 200)
-            .onDrop(of: [UTType.fileURL.identifier], isTargeted: nil) { providers in
-                handleDrop(providers: providers)
-            TableColumn("Exported Path") { file in
+        .onDrop(of: [UTType.fileURL.identifier], isTargeted: nil) { providers in
+            handleDrop(providers: providers)
+        }
+        TableColumn("Exported Path") { file in
                 Text(file.exportedURL?.path ?? "-")
                     .lineLimit(1)
                     .padding(.vertical, 6)
