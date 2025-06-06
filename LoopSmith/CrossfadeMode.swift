@@ -2,7 +2,8 @@ import Foundation
 
 enum CrossfadeMode: String, CaseIterable, Identifiable {
     case manual
-    case rhythmicBPM
+    case beatDetection
+    case spectral
 
     var id: Self { self }
 
@@ -10,8 +11,10 @@ enum CrossfadeMode: String, CaseIterable, Identifiable {
         switch self {
         case .manual:
             return "Manual"
-        case .rhythmicBPM:
-            return "Rhythmic (BPM)"
+        case .beatDetection:
+            return "Beat Detection"
+        case .spectral:
+            return "Spectral"
         }
     }
 }

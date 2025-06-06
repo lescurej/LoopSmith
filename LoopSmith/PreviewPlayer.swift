@@ -130,7 +130,6 @@ struct PreviewButton: View {
             outputURL: tmpURL,
             fadeDurationMs: file.fadeDurationMs,
             format: file.format,
-            analyzePerfectPoint: file.analyzePerfectPoint,
             crossfadeMode: file.crossfadeMode,
             bpm: file.bpm,
             progress: { percent in

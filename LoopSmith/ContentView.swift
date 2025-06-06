@@ -139,30 +139,23 @@ struct ContentView: View {
             // Appliquer le modificateur `.width(min:ideal:)` à la colonne Fade (%)
             .width(min: 200, ideal: 260)
 
-            TableColumn("Rhythm Sync") { file in
-                Toggle("", isOn: Binding(
-                    get: { file.rhythmSync },
+            TableColumn("Crossfade Mode") { file in
+                Picker("", selection: Binding(
+                    get: { file.crossfadeMode },
                     set: { newVal in
                         if let idx = audioFiles.firstIndex(where: { $0.id == file.id }) {
-                            audioFiles[idx].rhythmSync = newVal
+                            audioFiles[idx].crossfadeMode = newVal
                         }
                     }
-                ))
+                )) {
+                    ForEach(CrossfadeMode.allCases) { mode in
+                        Text(mode.displayName).tag(mode)
+                    }
+                }
                 .labelsHidden()
                 .padding(.vertical, 6)
                 .padding(.horizontal, 8)
                 .background(RoundedRectangle(cornerRadius: 6).fill(Color.backgroundSecondary))
-            }
-            TableColumn("Rhythmic Recomposition") { file in
-                Toggle("", isOn: Binding(
-                    get: { file.rhythmicRecomposition },
-                    set: { newVal in
-                        if let idx = audioFiles.firstIndex(where: { $0.id == file.id }) {
-                            audioFiles[idx].rhythmicRecomposition = newVal
-                        }
-                    }
-                ))
-                .labelsHidden()
             }
             TableColumn("Preview") { file in
                 PreviewButton(file: file, isExporting: $isExporting)

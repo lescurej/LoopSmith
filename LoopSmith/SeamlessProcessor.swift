@@ -38,9 +38,10 @@ struct SeamlessProcessor {
                 let midFrame = total / 2
                 var fadeSamples = max(1, Int(sampleRate * fadeDurationMs / 1000.0))
 
-                let rhythmSync = (crossfadeMode == .rhythmicBPM)
+                let beatDetection = (crossfadeMode == .beatDetection)
+                let spectral = (crossfadeMode == .spectral)
 
-                if rhythmSync, let bpm = bpm {
+                if beatDetection, let bpm = bpm {
                     let beatFrames = Int(sampleRate * 60.0 / bpm)
                     if beatFrames > 0 {
                         let multiples = max(1, Int(round(Double(fadeSamples) / Double(beatFrames))))
@@ -49,7 +50,7 @@ struct SeamlessProcessor {
                 }
 
                 var offsetFrames = 0
-                if rhythmSync {
+                if beatDetection {
                     let searchRange = min(fadeSamples, max(0, total - fadeSamples * 2))
                     if searchRange > 0, numChannels > 0 {
                         let channel = inputChannels[0]
@@ -74,7 +75,9 @@ struct SeamlessProcessor {
                             off += step
                         }
                     }
-                if analyzePerfectPoint, numChannels > 0 {
+                }
+
+                if spectral, numChannels > 0 {
                     let channel = inputChannels[0]
                     offsetFrames = SpectralLoopAnalyzer.bestOffset(
                         channel: channel,
