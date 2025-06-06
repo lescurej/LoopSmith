@@ -2,73 +2,55 @@ import Foundation
 import Accelerate
 
 struct SpectralLoopAnalyzer {
+    /// Compute the optimal alignment offset between the start of the buffer and
+    /// its end so that a crossfaded loop is as seamless as possible.
+    /// - Parameters:
+    ///   - channel: Pointer to the first sample of the audio channel to analyse.
+    ///   - totalFrames: Number of frames available in `channel`.
+    ///   - fadeSamples: Length of the cross‑fade region in samples.
+    /// - Returns: Offset in samples that provides the best spectral match.
     static func bestOffset(channel: UnsafePointer<Float>,
                            totalFrames: Int,
                            fadeSamples: Int) -> Int {
+        // Search is limited to the cross‑fade length and bounded by the
+        // available frames so that we do not read out of range.
         let searchRange = min(fadeSamples, max(0, totalFrames - fadeSamples * 2))
-        if searchRange <= 0 { return 0 }
+        guard searchRange > 0 else { return 0 }
 
-        // The vDSP.DiscreteFourierTransform initializer returns an optional
-        // instance. If the transform cannot be created, simply return offset 0.
-        guard let dft = try? vDSP.DiscreteFourierTransform(count: fadeSamples,
-                                                           direction: .forward,
-                                                           transformType: .complexReal,
-                                                           ofType: Float.self) else {
-            return 0
-        }
-
+        // Window used on both the beginning and candidate end segments.
         var window = [Float](repeating: 0, count: fadeSamples)
         vDSP_hann_window(&window, vDSP_Length(fadeSamples), Int32(vDSP_HANN_NORM))
 
-        var startSegment = [Float](repeating: 0, count: fadeSamples)
-        vDSP_vmul(channel, 1, window, 1, &startSegment, 1, vDSP_Length(fadeSamples))
-
-        var startImagInput = [Float](repeating: 0, count: fadeSamples)
-        var startReal = [Float](repeating: 0, count: fadeSamples/2)
-        var startImag = [Float](repeating: 0, count: fadeSamples/2)
-        dft.transform(inputReal: startSegment,
-                      inputImaginary: startImagInput,
-                      outputReal: &startReal,
-                      outputImaginary: &startImag)
-        var startMag = [Float](repeating: 0, count: fadeSamples/2)
-        for i in 0..<(fadeSamples/2) {
-            let r = startReal[i]
-            let im = startImag[i]
-            startMag[i] = sqrt(r * r + im * im)
-        }
+        // Start segment windowed and its precomputed norm.
+        var start = [Float](repeating: 0, count: fadeSamples)
+        vDSP_vmul(channel, 1, window, 1, &start, 1, vDSP_Length(fadeSamples))
+        var startNorm: Float = 0
+        vDSP_dotpr(start, 1, start, 1, &startNorm, vDSP_Length(fadeSamples))
+        startNorm = sqrt(startNorm)
 
         var candidate = [Float](repeating: 0, count: fadeSamples)
-        var candReal = [Float](repeating: 0, count: fadeSamples/2)
-        var candImag = [Float](repeating: 0, count: fadeSamples/2)
-        var candMag = [Float](repeating: 0, count: fadeSamples/2)
-
-        var bestScore: Float = .greatestFiniteMagnitude
         var bestOffset = 0
+        var bestScore: Float = -.greatestFiniteMagnitude
 
-        for off in (-searchRange)...searchRange {
-            let endStart = totalFrames - fadeSamples + off
+        for offset in (-searchRange)...searchRange {
+            let endStart = totalFrames - fadeSamples + offset
             if endStart < 0 || endStart + fadeSamples > totalFrames { continue }
 
+            // Windowed candidate segment.
             vDSP_vmul(channel + endStart, 1, window, 1, &candidate, 1, vDSP_Length(fadeSamples))
-            var candImagInput = [Float](repeating: 0, count: fadeSamples)
-            dft.transform(inputReal: candidate,
-                          inputImaginary: candImagInput,
-                          outputReal: &candReal,
-                          outputImaginary: &candImag)
-            for i in 0..<(fadeSamples/2) {
-                let r = candReal[i]
-                let im = candImag[i]
-                candMag[i] = sqrt(r * r + im * im)
-            }
+            var candNorm: Float = 0
+            vDSP_dotpr(candidate, 1, candidate, 1, &candNorm, vDSP_Length(fadeSamples))
+            candNorm = sqrt(candNorm)
 
-            var diff: Float = 0
-            for i in 0..<(fadeSamples/2) {
-                let delta = candMag[i] - startMag[i]
-                diff += delta * delta
-            }
-            if diff < bestScore {
-                bestScore = diff
-                bestOffset = off
+            var dot: Float = 0
+            vDSP_dotpr(start, 1, candidate, 1, &dot, vDSP_Length(fadeSamples))
+
+            let normProduct = startNorm * candNorm
+            let similarity = normProduct > 0 ? dot / normProduct : 0
+
+            if similarity > bestScore {
+                bestScore = similarity
+                bestOffset = offset
             }
         }
 
