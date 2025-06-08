@@ -3,6 +3,38 @@ layout: default
 title: LoopSmith
 ---
 
+<style>
+body {
+    background-color: #121212;
+    color: #FFFFFF;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #FFFFFF;
+}
+
+a {
+    color: #007AFF;
+}
+
+a:hover {
+    color: #0056b3;
+}
+
+img {
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+</style>
+
+<div class="container">
+
 # LoopSmith
 
 LoopSmith is a macOS application for creating seamless audio loops. It offers an intuitive drag & drop interface, live preview of cross‑fades and batch export to WAV or AIFF formats.
@@ -34,3 +66,5 @@ LoopSmith is a macOS application for creating seamless audio loops. It offers an
 Below is a sample view of the interface.
 
 ![Interface screenshot](interface.png)
+
+</div>
