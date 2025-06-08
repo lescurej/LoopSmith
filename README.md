@@ -15,7 +15,7 @@ ready-to-use loop files.
 - Output formats: WAV or AIFF. Exported files are prefixed with `LOOP_`.
 
 ## System Requirements
-- macOS 12.0 or later
+- macOS 13.0 or later
 - 4 GB RAM minimum recommended
 - 100 MB available disk space
 
@@ -34,7 +34,7 @@ ready-to-use loop files.
 - Use manual mode for precise control over transition points.
 
 ## Building from Source
-The project targets macOS 12 or later. Open `LoopSmith.xcodeproj` in Xcode and
+The project targets macOS 13 or later. Open `LoopSmith.xcodeproj` in Xcode and
 build the application, or use Swift Package Manager:
 
 ```bash
