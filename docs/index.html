@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LoopSmith</title>
+    <style>
+        :root {
+            --background-primary: #121212;
+            --background-secondary: #1E1E1E;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B3B3B3;
+            --accent-color: #007AFF;
+            --accent-hover: #0056b3;
+        }
+
+        body {
+            background-color: var(--background-primary);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 1em;
+            color: var(--text-primary);
+        }
+
+        h2 {
+            font-size: 1.8em;
+            margin: 1.5em 0 0.8em;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--text-secondary);
+            padding-bottom: 0.3em;
+        }
+
+        p {
+            margin: 1em 0;
+            color: var(--text-secondary);
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            margin: 0.8em 0;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+        }
+
+        li::before {
+            content: "•";
+            color: var(--accent-color);
+            font-weight: bold;
+            margin-right: 0.5em;
+        }
+
+        a {
+            color: var(--accent-color);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        a:hover {
+            color: var(--accent-hover);
+        }
+
+        .download-button {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            margin: 1em 0;
+            transition: background-color 0.2s ease;
+        }
+
+        .download-button:hover {
+            background-color: var(--accent-hover);
+            color: white;
+        }
+
+        .screenshot {
+            width: 100%;
+            max-width: 800px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 2em 0;
+        }
+
+        .emoji {
+            margin-right: 0.5em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>LoopSmith</h1>
+        
+        <p>LoopSmith is a macOS application for creating seamless audio loops. It offers an intuitive drag & drop interface, live preview of cross‑fades and batch export to WAV or AIFF formats.</p>
+
+        <h2>Features</h2>
+        <ul>
+            <li><span class="emoji">🎵</span> Drag & drop interface for easy file management</li>
+            <li><span class="emoji">🔄</span> Real-time preview of crossfades</li>
+            <li><span class="emoji">🎚️</span> Adjustable fade percentage</li>
+            <li><span class="emoji">🔀</span> Multiple crossfade modes</li>
+            <li><span class="emoji">📦</span> Batch export to WAV or AIFF</li>
+            <li><span class="emoji">🖥️</span> Native macOS application</li>
+        </ul>
+
+        <h2>How it Works</h2>
+        <ol>
+            <li>Import audio files using <strong>Import</strong> or by dropping them onto the list.</li>
+            <li>Adjust the fade percentage and choose a crossfade mode.</li>
+            <li>Preview the loop and export the processed files.</li>
+        </ol>
+
+        <h2>Download</h2>
+        <a href="https://github.com/lescurej/LoopSmith/releases/latest" class="download-button">Download Latest Version</a>
+
+        <h2>Requirements</h2>
+        <ul>
+            <li>macOS 11.0 or later</li>
+            <li>100MB of free disk space</li>
+        </ul>
+
+        <h2>Support</h2>
+        <ul>
+            <li><a href="https://github.com/lescurej/LoopSmith/issues">Report Issues</a></li>
+            <li><a href="https://github.com/lescurej/LoopSmith/wiki">Documentation</a></li>
+        </ul>
+
+        <h2>Interface Preview</h2>
+        <img src="interface.png" alt="LoopSmith Interface" class="screenshot">
+    </div>
+</body>
+</html> 
